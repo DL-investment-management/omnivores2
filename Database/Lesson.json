@@ -1,0 +1,60 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Lesson title"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit name (e.g. Supply & Demand)"
+    },
+    "unit_order": {
+      "type": "number",
+      "description": "Order of the unit in the path"
+    },
+    "lesson_order": {
+      "type": "number",
+      "description": "Order within the unit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short lesson description"
+    },
+    "xp_reward": {
+      "type": "number",
+      "description": "XP earned for completing"
+    },
+    "capital_reward": {
+      "type": "number",
+      "description": "Capital earned for completing"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon emoji for the lesson node"
+    },
+    "vocabulary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Key vocabulary terms and definitions for this lesson"
+    }
+  },
+  "required": [
+    "title",
+    "unit",
+    "unit_order",
+    "lesson_order",
+    "xp_reward"
+  ]
+}

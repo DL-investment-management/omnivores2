@@ -1,0 +1,23 @@
+{
+  "name": "Purchase",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "item_id": {
+      "type": "string"
+    },
+    "item_type": {
+      "type": "string"
+    },
+    "used": {
+      "type": "boolean",
+      "description": "Whether the item has been consumed"
+    }
+  },
+  "required": [
+    "user_email",
+    "item_id"
+  ]
+}
