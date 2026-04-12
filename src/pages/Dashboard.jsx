@@ -5,7 +5,9 @@ import StreakBadge from "../components/StreakBadge";
 import StreakCelebration from "../components/StreakCelebration";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUserProgress, subscribeToUnlockedAuthors, unlockAuthorReward, isProUser, isUnitFree } from "@/lib/appData";
+import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUserProgress, subscribeToUnlockedAuthors, unlockAuthorReward, isProUser, isUnitFree, needsOnboarding, markOnboardingDone } from "@/lib/appData";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
+import { AnimatePresence } from "framer-motion";
 import { getLevelInfo } from "@/lib/progression";
 import { getAuthorRewardForUnit } from "@/lib/authorRewards";
 import UnitAuthorNode from "@/components/UnitAuthorNode";
@@ -48,6 +50,8 @@ export default function Dashboard() {
     return () => window.removeEventListener("econogo:pro-updated", handler);
   }, []);
   const [showStreakPreview, setShowStreakPreview] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [pendingStreakGrew, setPendingStreakGrew] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -59,7 +63,12 @@ export default function Dashboard() {
         setLessons(l);
         setProgress(p);
         setUnlockedAuthors(getUnlockedAuthorIds());
-        if (streakGrew) {
+
+        if (needsOnboarding()) {
+          // Show tutorial first — hold streak animation until after
+          setShowOnboarding(true);
+          setPendingStreakGrew(streakGrew);
+        } else if (streakGrew) {
           setTimeout(() => setShowStreakPreview(true), 600);
         }
       } catch (e) {
@@ -71,6 +80,14 @@ export default function Dashboard() {
     load();
     return subscribeToUnlockedAuthors(setUnlockedAuthors);
   }, []);
+
+  const handleOnboardingComplete = () => {
+    markOnboardingDone();
+    setShowOnboarding(false);
+    if (pendingStreakGrew) {
+      setTimeout(() => setShowStreakPreview(true), 600);
+    }
+  };
 
   if (loading) {
     return (
@@ -161,6 +178,15 @@ export default function Dashboard() {
           </p>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingTutorial
+            userName={user?.full_name}
+            onComplete={handleOnboardingComplete}
+          />
+        )}
+      </AnimatePresence>
 
       <StreakCelebration streak={user?.streak || 0} show={showStreakPreview} onDismiss={() => setShowStreakPreview(false)} />
 

@@ -40,12 +40,28 @@ export async function syncProStatus(email) {
   }
 }
 
+const LOCAL_ONBOARDING_KEY = "econogo_onboarding_done";
+
+export function needsOnboarding() {
+  if (!canUseLocalStorage()) return false;
+  return localStorage.getItem(LOCAL_ONBOARDING_KEY) !== "true";
+}
+
+export function markOnboardingDone() {
+  if (!canUseLocalStorage()) return;
+  localStorage.setItem(LOCAL_ONBOARDING_KEY, "true");
+}
+
 // Called once after Google sign-in to ensure localStorage has the right user.
 export function initUserSession(email, fullName) {
   if (!canUseLocalStorage() || !email) return;
   const stored = readStoredJson(LOCAL_USER_KEY, null);
   // If we already have data for this exact email, keep it (preserve XP, streak, etc.)
-  if (stored?.email === email) return;
+  if (stored?.email === email) {
+    // Returning user — mark onboarding done so they never see the tutorial
+    markOnboardingDone();
+    return;
+  }
   // New user or different Google account — start fresh
   writeStoredJson(LOCAL_USER_KEY, {
     email,
@@ -57,6 +73,7 @@ export function initUserSession(email, fullName) {
     avatar: "🐂",
     last_active_date: getYesterday(),
   });
+  // Do NOT mark onboarding done — new user needs to see the tutorial
 }
 
 export function isUnitFree(unitName) {
