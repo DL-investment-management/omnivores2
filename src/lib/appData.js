@@ -8,10 +8,15 @@ const LOCAL_PRO_KEY = "econogo_pro";
 const USER_UPDATED_EVENT = "econogo:user-updated";
 const AUTHORS_UPDATED_EVENT = "econogo:authors-updated";
 
+// ── Monetization gate ──────────────────────────────────────────────────────
+// Set to true to re-enable the free/pro split. false = everyone gets full access.
+export const PRO_GATING_ENABLED = false;
+
 // ── Freemium: units available for free ──
 export const FREE_UNITS = ["Supply & Demand"];
 
 export function isProUser() {
+  if (!PRO_GATING_ENABLED) return true;
   if (!canUseLocalStorage()) return false;
   return localStorage.getItem(LOCAL_PRO_KEY) === "true";
 }
@@ -52,6 +57,42 @@ export function markOnboardingDone() {
   localStorage.setItem(LOCAL_ONBOARDING_KEY, "true");
 }
 
+// ── Energy system ──────────────────────────────────────────────────────────
+const LOCAL_ENERGY_KEY = "econogo_energy";
+export const MAX_ENERGY = 100;
+export const ENERGY_COST_PER_QUESTION = 5;
+const ENERGY_REGEN_MS = 72 * 60 * 60 * 1000; // 72 hours to fully regen 100 energy
+
+export function getEnergy() {
+  if (!canUseLocalStorage()) return MAX_ENERGY;
+  const stored = readStoredJson(LOCAL_ENERGY_KEY, null);
+  if (!stored) return MAX_ENERGY;
+  const elapsed = Date.now() - new Date(stored.last_updated).getTime();
+  const regen = (elapsed / ENERGY_REGEN_MS) * MAX_ENERGY;
+  return Math.min(MAX_ENERGY, Math.floor(stored.amount + regen));
+}
+
+export function spendEnergy(amount = ENERGY_COST_PER_QUESTION) {
+  if (!canUseLocalStorage()) return true;
+  const current = getEnergy();
+  const hadEnough = current >= amount;
+  const next = Math.max(0, current - amount);
+  writeStoredJson(LOCAL_ENERGY_KEY, {
+    amount: next,
+    last_updated: new Date().toISOString(),
+  });
+  window.dispatchEvent(new CustomEvent("econogo:energy-updated", { detail: next }));
+  return hadEnough;
+}
+
+// Returns ms until `needed` energy is available (0 if already available)
+export function msUntilEnergy(needed = ENERGY_COST_PER_QUESTION) {
+  const current = getEnergy();
+  if (current >= needed) return 0;
+  const deficit = needed - current;
+  return Math.ceil((deficit / MAX_ENERGY) * ENERGY_REGEN_MS);
+}
+
 // Called once after Google sign-in to ensure localStorage has the right user.
 export function initUserSession(email, fullName) {
   if (!canUseLocalStorage() || !email) return;
@@ -77,6 +118,7 @@ export function initUserSession(email, fullName) {
 }
 
 export function isUnitFree(unitName) {
+  if (!PRO_GATING_ENABLED) return true;
   return FREE_UNITS.includes(unitName);
 }
 

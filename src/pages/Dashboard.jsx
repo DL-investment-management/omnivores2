@@ -170,12 +170,28 @@ export default function Dashboard() {
           <h1 className="text-2xl font-heading font-bold text-foreground">
             {user?.full_name || "Economist"} 👋
           </h1>
-          <div className="mt-1 cursor-pointer" onClick={() => setShowStreakPreview(true)}>
-            <StreakBadge streak={user?.streak || 0} />
+          <div className="mt-1 flex items-center gap-3">
+            <div className="cursor-pointer" onClick={() => setShowStreakPreview(true)}>
+              <StreakBadge streak={user?.streak || 0} />
+            </div>
+            {/* XP progress bar */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between text-[10px] font-semibold text-muted-foreground w-24">
+                <span>Lv.{levelInfo.level} {levelInfo.title}</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden w-24">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${levelInfo.progressPercent}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {levelInfo.xpToNextLevel > 0 ? `${levelInfo.xpToNextLevel} XP to next level` : "Max level"}
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-accent">
-            Level {levelInfo.level} · {levelInfo.title}
-          </p>
         </div>
       </motion.div>
 

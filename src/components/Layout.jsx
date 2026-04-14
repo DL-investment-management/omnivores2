@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Users, Mail, Crown, Link2 } from "lucide-react";
+import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Users, Mail, Crown, Link2, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getCurrentUser, subscribeToCurrentUser, isProUser, syncProStatus } from "@/lib/appData";
+import { getCurrentUser, subscribeToCurrentUser, isProUser, syncProStatus, PRO_GATING_ENABLED, getEnergy, MAX_ENERGY } from "@/lib/appData";
 
 const PRO_LOCKED_PATHS = ["/leaderboard", "/glossary", "/good-reads", "/shop"];
 
@@ -21,11 +21,23 @@ export default function Layout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isPro, setIsPro] = useState(isProUser());
+  const [energy, setEnergy] = useState(() => getEnergy());
 
   useEffect(() => {
     const handler = (e) => setIsPro(e.detail);
     window.addEventListener("econogo:pro-updated", handler);
     return () => window.removeEventListener("econogo:pro-updated", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => setEnergy(e.detail);
+    window.addEventListener("econogo:energy-updated", handler);
+    // Refresh every 5 minutes so regen is reflected
+    const tick = setInterval(() => setEnergy(getEnergy()), 5 * 60 * 1000);
+    return () => {
+      window.removeEventListener("econogo:energy-updated", handler);
+      clearInterval(tick);
+    };
   }, []);
 
   useEffect(() => {
@@ -61,7 +73,7 @@ export default function Layout() {
               </div>
               <span className="font-heading font-bold text-lg text-foreground">Econ-Go</span>
             </Link>
-            {isPro ? (
+            {PRO_GATING_ENABLED && (isPro ? (
               <span className="ml-2 flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sm cursor-default">
                 <Crown className="w-3.5 h-3.5" /> Pro
               </span>
@@ -69,12 +81,16 @@ export default function Layout() {
               <Link to="/upgrade" className="ml-2 flex items-center gap-1 bg-muted text-primary rounded-full px-3 py-1.5 text-xs font-bold shadow-sm border border-primary/30 hover:bg-primary/10 transition cursor-pointer">
                 Free Tier
               </Link>
-            )}
+            ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
               <Flame className="w-4 h-4 text-secondary" />
               <span className="font-bold text-sm font-heading">{streak}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
+              <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+              <span className="font-bold text-sm font-heading">{energy}</span>
             </div>
             <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
               <span className="text-sm">💰</span>
