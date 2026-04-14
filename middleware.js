@@ -1,20 +1,7 @@
 // Vercel Edge Middleware — serves route-specific meta tags to social crawlers.
 // Real users pass through to the normal Vite SPA.
 
-export const config = {
-  matcher: [
-    "/",
-    "/leaderboard",
-    "/glossary",
-    "/good-reads",
-    "/shop",
-    "/upgrade",
-    "/our-team",
-    "/contact",
-    "/privacy",
-    "/terms",
-  ],
-};
+export const config = { matcher: [] };
 
 const ROUTE_META = {
   "/": {
