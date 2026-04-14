@@ -43,6 +43,27 @@ export async function syncProStatus(email) {
   } catch {
     // Network error — keep whatever is stored locally
   }
+
+  // Also sync local XP/name/streak to Supabase so leaderboard stays up to date
+  try {
+    const localUser = readStoredJson(LOCAL_USER_KEY, null);
+    if (localUser?.email === email && (localUser.xp || 0) >= 0) {
+      fetch("/api/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: localUser.email,
+          full_name: localUser.full_name,
+          xp: localUser.xp || 0,
+          streak: localUser.streak || 0,
+          avatar: localUser.avatar,
+          rank: localUser.rank,
+        }),
+      }).catch(() => {});
+    }
+  } catch {
+    // silent
+  }
 }
 
 const LOCAL_ONBOARDING_KEY = "econogo_onboarding_done";
@@ -275,6 +296,23 @@ export async function updateCurrentUser(patch) {
   };
   writeStoredJson(LOCAL_USER_KEY, nextUser);
   notifyUserUpdated(nextUser);
+
+  // Sync to Supabase so the leaderboard has real data (fire-and-forget)
+  if (nextUser.email) {
+    fetch("/api/sync-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: nextUser.email,
+        full_name: nextUser.full_name,
+        xp: nextUser.xp || 0,
+        streak: nextUser.streak || 0,
+        avatar: nextUser.avatar,
+        rank: nextUser.rank,
+      }),
+    }).catch(() => {}); // silent fail — leaderboard sync is best-effort
+  }
+
   return clone(nextUser);
 }
 

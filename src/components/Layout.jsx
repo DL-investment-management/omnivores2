@@ -12,8 +12,7 @@ const navItems = [
   { path: "/good-reads", icon: Library, label: "Reads" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
   { path: "/profile", icon: User, label: "Profile" },
-  { path: "/our-team", icon: Users, label: "Team" },
-  { path: "/contact", icon: Mail, label: "Contact" },
+  { path: "/upgrade", icon: Crown, label: "Pro" },
 ];
 
 export default function Layout() {
@@ -110,29 +109,18 @@ export default function Layout() {
         <div className="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = location.pathname === path;
-            const locked = !isPro && PRO_LOCKED_PATHS.includes(path);
             return (
               <button
                 key={path}
-                onClick={() => navigate(locked ? "/upgrade" : path)}
-                title={locked ? "Purchase premium to unlock" : label}
+                onClick={() => navigate(path)}
+                title={label}
                 className={`relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 ${
-                  locked
-                    ? "text-muted-foreground/40 cursor-pointer"
-                    : isActive
+                  isActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className="relative">
-                  <Icon className={`w-5 h-5 ${isActive && !locked ? "stroke-[2.5]" : ""}`} />
-                  {locked && (
-                    <div className="absolute -top-1.5 -right-2.5 flex items-center">
-                      <Link2 className="w-3 h-3 text-yellow-500 rotate-45" />
-                      <Link2 className="w-3 h-3 text-yellow-500 -rotate-45 -ml-1.5" />
-                    </div>
-                  )}
-                </div>
+                <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
                 <span className="text-[10px] font-semibold">{label}</span>
               </button>
             );
