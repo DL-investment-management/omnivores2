@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/lib/appData";
+import { triggerLeaderboardQuest } from "@/lib/quests";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Crown, RefreshCw } from "lucide-react";
 
@@ -17,6 +18,7 @@ export default function Leaderboard() {
         getCurrentUser(),
         fetch("/api/leaderboard"),
       ]);
+      triggerLeaderboardQuest();
       setCurrentUser(u);
       if (!res.ok) throw new Error("Failed to load leaderboard");
       const { users: ranked } = await res.json();

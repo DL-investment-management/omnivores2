@@ -6,6 +6,7 @@ import StreakCelebration from "../components/StreakCelebration";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUserProgress, subscribeToUnlockedAuthors, unlockAuthorReward, isProUser, isUnitFree, needsOnboarding, markOnboardingDone } from "@/lib/appData";
+import { triggerLoginQuest, triggerStreakQuest } from "@/lib/quests";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { AnimatePresence } from "framer-motion";
 import { getLevelInfo } from "@/lib/progression";
@@ -57,6 +58,8 @@ export default function Dashboard() {
     async function load() {
       try {
         const { user: u, streakGrew } = await checkInStreak();
+        triggerLoginQuest();
+        if ((u.streak || 0) > 0) triggerStreakQuest();
         const l = await getLessons();
         const p = await getUserProgress(u.email);
         setUser(u);

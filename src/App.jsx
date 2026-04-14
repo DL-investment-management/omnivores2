@@ -21,6 +21,7 @@ import SignIn from './pages/SignIn';
 import Admin from './pages/Admin';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import Quests from './pages/Quests';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated } = useAuth();
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
         <Route path="/our-team" element={<OurTeam />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/upgrade" element={<ProUpgrade />} />
+        <Route path="/quests" element={<Quests />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />

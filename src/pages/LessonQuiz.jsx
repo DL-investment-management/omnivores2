@@ -27,6 +27,7 @@ import {
   MAX_ENERGY,
 } from "@/lib/appData";
 import { getLevelInfo, getNewlyUnlockedCosmetics } from "@/lib/progression";
+import { triggerLessonQuest } from "@/lib/quests";
 import { getAuthorRewardForUnit } from "@/lib/authorRewards";
 
 export default function LessonQuiz() {
@@ -113,6 +114,7 @@ export default function LessonQuiz() {
     });
 
     if (passed) {
+      triggerLessonQuest();
       // Update user stats
       const previousXp = user.xp || 0;
       const nextXp = previousXp + xpEarned;

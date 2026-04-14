@@ -380,6 +380,8 @@ export async function createPurchase(purchaseRecord) {
     created_date: new Date().toISOString(),
   });
   writeStoredJson(LOCAL_PURCHASES_KEY, purchases);
+  // Trigger shop quest (imported lazily to avoid circular deps)
+  import("./quests").then(({ triggerShopQuest }) => triggerShopQuest()).catch(() => {});
   return clone(purchaseRecord);
 }
 

@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Users, Mail, Crown, Link2, Zap } from "lucide-react";
+import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Users, Mail, Crown, Link2, Zap, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentUser, subscribeToCurrentUser, isProUser, syncProStatus, PRO_GATING_ENABLED, getEnergy, MAX_ENERGY } from "@/lib/appData";
+import { getUnclaimedCount } from "@/lib/quests";
 
 const PRO_LOCKED_PATHS = ["/leaderboard", "/glossary", "/good-reads", "/shop"];
 
@@ -9,7 +10,7 @@ const navItems = [
   { path: "/", icon: Home, label: "Learn" },
   { path: "/leaderboard", icon: Trophy, label: "Rank" },
   { path: "/glossary", icon: BookMarked, label: "Glossary" },
-  { path: "/good-reads", icon: Library, label: "Reads" },
+  { path: "/quests", icon: Target, label: "Quests" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
   { path: "/profile", icon: User, label: "Profile" },
   { path: "/upgrade", icon: Crown, label: "Pro" },
@@ -21,6 +22,7 @@ export default function Layout() {
   const [user, setUser] = useState(null);
   const [isPro, setIsPro] = useState(isProUser());
   const [energy, setEnergy] = useState(() => getEnergy());
+  const [unclaimedQuests, setUnclaimedQuests] = useState(0);
 
   useEffect(() => {
     const handler = (e) => setIsPro(e.detail);
@@ -31,12 +33,20 @@ export default function Layout() {
   useEffect(() => {
     const handler = (e) => setEnergy(e.detail);
     window.addEventListener("econogo:energy-updated", handler);
-    // Refresh every 5 minutes so regen is reflected
     const tick = setInterval(() => setEnergy(getEnergy()), 5 * 60 * 1000);
     return () => {
       window.removeEventListener("econogo:energy-updated", handler);
       clearInterval(tick);
     };
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => {
+      getCurrentUser().then((u) => setUnclaimedQuests(getUnclaimedCount(u?.streak || 0))).catch(() => {});
+    };
+    refresh();
+    window.addEventListener("econogo:quests-updated", refresh);
+    return () => window.removeEventListener("econogo:quests-updated", refresh);
   }, []);
 
   useEffect(() => {
@@ -109,18 +119,26 @@ export default function Layout() {
         <div className="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = location.pathname === path;
+            const showBadge = path === "/quests" && unclaimedQuests > 0;
             return (
               <button
                 key={path}
                 onClick={() => navigate(path)}
                 title={label}
-                className={`relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
                   isActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
+                <div className="relative">
+                  <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-destructive text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                      {unclaimedQuests}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-semibold">{label}</span>
               </button>
             );
