@@ -20,14 +20,6 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: path.resolve(__dirname, 'Index.html'),
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'motion': ['framer-motion'],
-          'ui': ['lucide-react', '@radix-ui/react-progress', '@radix-ui/react-slot'],
-          'supabase': ['@supabase/supabase-js'],
-        },
-      },
     },
   },
   resolve: {
