@@ -348,13 +348,28 @@ export default function Profile() {
         ))}
       </div>
 
+      {/* Cancel Subscription (Pro only) */}
+      {isProUser() && (
+        <Button
+          onClick={() => {
+            // TODO: Integrate with Lemon Squeezy API for real cancellation
+            window.open('https://econ-go.lemonsqueezy.com/my-orders', '_blank');
+          }}
+          variant="destructive"
+          className="w-full rounded-xl mt-8"
+        >
+          <Crown className="w-4 h-4 mr-2" />
+          Cancel Subscription
+        </Button>
+      )}
+
       {/* Logout */}
       <Button
         onClick={async () => {
           await supabase.auth.signOut();
         }}
         variant="outline"
-        className="w-full rounded-xl"
+        className="w-full rounded-xl mt-3"
       >
         <LogOut className="w-4 h-4 mr-2" />
         Sign Out

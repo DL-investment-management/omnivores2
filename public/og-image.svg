@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="60%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="rgba(0,0,0,0.18)"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle pattern overlay -->
+  <circle cx="1050" cy="80"  r="180" fill="rgba(255,255,255,0.06)"/>
+  <circle cx="1150" cy="550" r="220" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="100"  cy="500" r="150" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Logo box -->
+  <rect x="88" y="175" width="260" height="260" rx="52" fill="white" filter="url(#shadow)"/>
+  <text
+    x="218" y="368"
+    font-family="Arial Black, Arial, sans-serif"
+    font-weight="900"
+    font-size="178"
+    fill="#f97316"
+    text-anchor="middle"
+  >E</text>
+
+  <!-- App name -->
+  <text
+    x="408" y="300"
+    font-family="Arial Black, Arial, sans-serif"
+    font-weight="900"
+    font-size="96"
+    fill="white"
+  >Econ-Go</text>
+
+  <!-- Tagline -->
+  <text
+    x="408" y="368"
+    font-family="Arial, sans-serif"
+    font-size="42"
+    fill="rgba(255,255,255,0.82)"
+  >Learn Economics One Lesson at a Time</text>
+
+  <!-- Feature pills -->
+  <rect x="408" y="408" width="194" height="56" rx="28" fill="rgba(255,255,255,0.22)"/>
+  <text x="505" y="444" font-family="Arial, sans-serif" font-size="28" fill="white" text-anchor="middle">📚 Lessons</text>
+
+  <rect x="616" y="408" width="182" height="56" rx="28" fill="rgba(255,255,255,0.22)"/>
+  <text x="707" y="444" font-family="Arial, sans-serif" font-size="28" fill="white" text-anchor="middle">🔥 Streaks</text>
+
+  <rect x="812" y="408" width="178" height="56" rx="28" fill="rgba(255,255,255,0.22)"/>
+  <text x="901" y="444" font-family="Arial, sans-serif" font-size="28" fill="white" text-anchor="middle">🏆 Ranks</text>
+
+  <!-- URL -->
+  <text
+    x="408" y="545"
+    font-family="Arial, sans-serif"
+    font-size="34"
+    fill="rgba(255,255,255,0.52)"
+  >econ-go.com</text>
+</svg>

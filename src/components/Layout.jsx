@@ -54,18 +54,24 @@ export default function Layout() {
       {/* Top Bar */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-heading font-bold text-lg">E</span>
-            </div>
-            <span className="font-heading font-bold text-lg text-foreground">Econ-Go</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            {!isPro && (
-              <Link to="/upgrade" className="flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sm">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-heading font-bold text-lg">E</span>
+              </div>
+              <span className="font-heading font-bold text-lg text-foreground">Econ-Go</span>
+            </Link>
+            {isPro ? (
+              <span className="ml-2 flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sm cursor-default">
                 <Crown className="w-3.5 h-3.5" /> Pro
+              </span>
+            ) : (
+              <Link to="/upgrade" className="ml-2 flex items-center gap-1 bg-muted text-primary rounded-full px-3 py-1.5 text-xs font-bold shadow-sm border border-primary/30 hover:bg-primary/10 transition cursor-pointer">
+                Free Tier
               </Link>
             )}
+          </div>
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
               <Flame className="w-4 h-4 text-secondary" />
               <span className="font-bold text-sm font-heading">{streak}</span>
