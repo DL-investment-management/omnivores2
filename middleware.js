@@ -2,7 +2,18 @@
 // Real users pass through to the normal Vite SPA.
 
 export const config = {
-  matcher: ["/", "/leaderboard", "/glossary", "/good-reads", "/shop", "/upgrade", "/our-team", "/contact", "/privacy", "/terms"],
+  matcher: [
+    "/",
+    "/leaderboard",
+    "/glossary",
+    "/good-reads",
+    "/shop",
+    "/upgrade",
+    "/our-team",
+    "/contact",
+    "/privacy",
+    "/terms",
+  ],
 };
 
 const ROUTE_META = {
