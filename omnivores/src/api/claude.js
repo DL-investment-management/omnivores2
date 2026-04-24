@@ -1,7 +1,15 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+// Lazy init so a missing key doesn't crash the app at startup
+let _model = null;
+function getModel() {
+  if (!_model) {
+    const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+    if (!key) throw new Error('EXPO_PUBLIC_GEMINI_API_KEY is not set');
+    _model = new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.0-flash' });
+  }
+  return _model;
+}
 
 function parseJSON(text) {
   const t = text.trim();
@@ -16,7 +24,7 @@ export async function analyzeFridge(base64Image, profile = {}) {
   const dietNote = profile.dietary?.length ? `User is: ${profile.dietary.join(', ')}.` : '';
   const allergenNote = profile.allergens?.length ? `Allergens to flag: ${profile.allergens.join(', ')}.` : '';
 
-  const result = await model.generateContent([
+  const result = await getModel().generateContent([
     { inlineData: { mimeType: 'image/jpeg', data: base64Image } },
     `Analyze this fridge photo. Identify every visible food item.
 ${dietNote} ${allergenNote}
@@ -41,7 +49,7 @@ export async function getRecipes(items, profile = {}) {
   const list = sorted.map(i => `${i.name} (${i.daysLeft}d, ${i.condition})`).join('\n');
   const dietNote = profile.dietary?.length ? `User dietary needs: ${profile.dietary.join(', ')}.` : '';
 
-  const result = await model.generateContent(
+  const result = await getModel().generateContent(
     `Fridge items by urgency:\n${list}\n${dietNote}\nGenerate 3 recipes using soonest-expiring items. Return ONLY JSON:
 {
   "recipes": [{
@@ -59,7 +67,7 @@ export async function getRecipes(items, profile = {}) {
 
 export async function getGroceryList(items) {
   const list = items.map(i => `${i.name} (${i.daysLeft}d left, ${i.condition})`).join('\n');
-  const result = await model.generateContent(
+  const result = await getModel().generateContent(
     `Based on these fridge items:\n${list}\nGenerate a grocery list to restock expiring/missing essentials. Return ONLY JSON:
 {
   "groceries": [{
@@ -75,7 +83,7 @@ export async function getGroceryList(items) {
 
 export async function getMealPlan(items) {
   const list = items.map(i => `${i.name} (${i.daysLeft}d left)`).join('\n');
-  const result = await model.generateContent(
+  const result = await getModel().generateContent(
     `Fridge contents:\n${list}\nCreate a 7-day meal plan using these ingredients before they expire. Return ONLY JSON:
 {
   "plan": [{
@@ -91,7 +99,7 @@ export async function getMealPlan(items) {
 }
 
 export async function lookupBarcode(barcode) {
-  const result = await model.generateContent(
+  const result = await getModel().generateContent(
     `Barcode: ${barcode}. If you recognize this product, return its food details. Otherwise make a best guess for a common grocery item with this barcode format. Return ONLY JSON:
 {
   "name": "string",

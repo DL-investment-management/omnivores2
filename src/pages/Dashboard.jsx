@@ -9,6 +9,7 @@ import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUse
 import { triggerLoginQuest, triggerStreakQuest } from "@/lib/quests";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import LevelUpCelebration from "@/components/LevelUpCelebration";
+import MiniQuizModal from "@/components/MiniQuizModal";
 import { AnimatePresence } from "framer-motion";
 import { getLevelInfo } from "@/lib/progression";
 import { getAuthorRewardForUnit } from "@/lib/authorRewards";
@@ -74,6 +75,7 @@ export default function Dashboard() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpXp, setLevelUpXp] = useState(0);
   const [prevXpSnapshot, setPrevXpSnapshot] = useState(0);
+  const [miniQuizData, setMiniQuizData] = useState(null); // { vocab, emoji }
 
   useEffect(() => {
     async function load() {
@@ -253,6 +255,15 @@ export default function Dashboard() {
       <StreakCelebration streak={user?.streak || 0} show={showStreakPreview} onDismiss={() => setShowStreakPreview(false)} />
       <LevelUpCelebration show={showLevelUp} xp={levelUpXp} prevXp={prevXpSnapshot} onDismiss={() => setShowLevelUp(false)} />
 
+      {/* Mini Quiz Modal — triggered by clicking path decoration emojis */}
+      {miniQuizData && (
+        <MiniQuizModal
+          vocab={miniQuizData.vocab}
+          emoji={miniQuizData.emoji}
+          onClose={() => setMiniQuizData(null)}
+        />
+      )}
+
         {/* Mobile Unit Selector */}
         <div className="md:hidden flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
           <button
@@ -346,6 +357,7 @@ export default function Dashboard() {
               const unitComplete = isUnitComplete(unitLessons);
               const pathItems = unitLessons.map((lesson, i) => ({
                 key: lesson.id,
+                lesson,
                 index: i,
                 isLeft: i % 2 === 0,
                 render: () => {
@@ -394,6 +406,19 @@ export default function Dashboard() {
                 // Show a right deco every 4 items starting at index 3
                 const showRight = itemIndex % 4 === 3;
 
+                // Build vocab pool: all terms from lessons up to (and including) this item's lesson
+                const globalIdx = item.lesson ? lessons.indexOf(item.lesson) : -1;
+                const quizVocab = globalIdx >= 0
+                  ? lessons
+                      .slice(0, globalIdx + 1)
+                      .flatMap((l) => (l.vocabulary || []).map((v) => ({ ...v, lessonTitle: l.title })))
+                  : [];
+
+                const openQuiz = (emoji) => {
+                  if (quizVocab.length < 4) return; // not enough terms yet
+                  setMiniQuizData({ vocab: quizVocab, emoji });
+                };
+
                 return (
                   <div key={item.key} className="relative">
                     {previousItem && (
@@ -401,27 +426,35 @@ export default function Dashboard() {
                     )}
                     {/* Left side decoration */}
                     {showLeft && (
-                      <motion.div
-                        className="absolute hidden md:block pointer-events-none select-none"
-                        style={{ left: "-72px", top: "8px" }}
+                      <motion.button
+                        className="absolute hidden md:flex items-center justify-center select-none"
+                        style={{ left: "-72px", top: "8px", background: "none", border: "none", padding: 0, cursor: quizVocab.length >= 4 ? "pointer" : "default" }}
                         initial={{ scale: 0, rotate: -15, opacity: 0 }}
                         animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        whileHover={quizVocab.length >= 4 ? { scale: 1.2 } : {}}
+                        whileTap={quizVocab.length >= 4 ? { scale: 0.9 } : {}}
                         transition={{ type: "spring", stiffness: 220, damping: 18, delay: 0.3 + itemIndex * 0.08 }}
+                        onClick={() => openQuiz(deco[0])}
+                        title={quizVocab.length >= 4 ? "Take a mini quiz!" : undefined}
                       >
                         <span className="text-4xl drop-shadow-md">{deco[0]}</span>
-                      </motion.div>
+                      </motion.button>
                     )}
                     {/* Right side decoration */}
                     {showRight && (
-                      <motion.div
-                        className="absolute hidden md:block pointer-events-none select-none"
-                        style={{ right: "-72px", top: "8px" }}
+                      <motion.button
+                        className="absolute hidden md:flex items-center justify-center select-none"
+                        style={{ right: "-72px", top: "8px", background: "none", border: "none", padding: 0, cursor: quizVocab.length >= 4 ? "pointer" : "default" }}
                         initial={{ scale: 0, rotate: 15, opacity: 0 }}
                         animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        whileHover={quizVocab.length >= 4 ? { scale: 1.2 } : {}}
+                        whileTap={quizVocab.length >= 4 ? { scale: 0.9 } : {}}
                         transition={{ type: "spring", stiffness: 220, damping: 18, delay: 0.3 + itemIndex * 0.08 }}
+                        onClick={() => openQuiz(deco[1])}
+                        title={quizVocab.length >= 4 ? "Take a mini quiz!" : undefined}
                       >
                         <span className="text-4xl drop-shadow-md">{deco[1]}</span>
-                      </motion.div>
+                      </motion.button>
                     )}
                     {item.render()}
                   </div>
