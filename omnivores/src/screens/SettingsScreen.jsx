@@ -22,85 +22,159 @@ export default function SettingsScreen({ onBack }) {
   if (!settings) return null;
 
   return (
-    <HudScreen title="// SYSTEM SETTINGS" onBack={onBack}>
+    <HudScreen title="Settings" subtitle="Configure your scanning preferences" onBack={onBack}>
 
-      {/* Auto-scan interval */}
-      <Text style={styles.sectionLabel}>AUTO-SCAN INTERVAL</Text>
-      <View style={styles.intervalRow}>
-        {INTERVALS.map(s => (
-          <TouchableOpacity
-            key={s}
-            style={[styles.intervalBtn, settings.scanInterval === s && styles.intervalBtnActive]}
-            onPress={() => update('scanInterval', s)}
-          >
-            <Text style={[styles.intervalText, settings.scanInterval === s && styles.intervalTextActive]}>
-              {s}s
-            </Text>
-          </TouchableOpacity>
-        ))}
+      {/* Scan interval */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardIcon}>⏱</Text>
+          <View>
+            <Text style={styles.cardTitle}>Auto-Scan Interval</Text>
+            <Text style={styles.cardHint}>How often to scan in auto mode</Text>
+          </View>
+        </View>
+        <View style={styles.pillRow}>
+          {INTERVALS.map(s => {
+            const active = settings.scanInterval === s;
+            return (
+              <TouchableOpacity
+                key={s}
+                style={[styles.pill, active && styles.pillActive]}
+                onPress={() => update('scanInterval', s)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.pillText, active && styles.pillTextActive]}>{s}s</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
       {/* Units */}
-      <Text style={[styles.sectionLabel, { marginTop: 28 }]}>EXPIRY DISPLAY UNITS</Text>
-      <View style={styles.intervalRow}>
-        {['days', 'hours'].map(u => (
-          <TouchableOpacity
-            key={u}
-            style={[styles.intervalBtn, settings.units === u && styles.intervalBtnActive]}
-            onPress={() => update('units', u)}
-          >
-            <Text style={[styles.intervalText, settings.units === u && styles.intervalTextActive]}>
-              {u.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardIcon}>📅</Text>
+          <View>
+            <Text style={styles.cardTitle}>Expiry Display Units</Text>
+            <Text style={styles.cardHint}>How remaining time is shown</Text>
+          </View>
+        </View>
+        <View style={styles.pillRow}>
+          {['days', 'hours'].map(u => {
+            const active = settings.units === u;
+            return (
+              <TouchableOpacity
+                key={u}
+                style={[styles.pill, styles.pillWide, active && styles.pillActive]}
+                onPress={() => update('units', u)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.pillText, active && styles.pillTextActive]}>
+                  {u.charAt(0).toUpperCase() + u.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
       {/* Notifications */}
-      <Text style={[styles.sectionLabel, { marginTop: 28 }]}>EXPIRY ALERTS</Text>
-      <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>ENABLE NOTIFICATIONS</Text>
-        <Switch
-          value={settings.notificationsEnabled}
-          onValueChange={v => update('notificationsEnabled', v)}
-          trackColor={{ true: 'rgba(0,212,255,0.4)', false: 'rgba(255,255,255,0.1)' }}
-          thumbColor={settings.notificationsEnabled ? '#00D4FF' : '#444'}
-        />
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardIcon}>🔔</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Expiry Alerts</Text>
+            <Text style={styles.cardHint}>Get notified before items expire</Text>
+          </View>
+          <Switch
+            value={settings.notificationsEnabled}
+            onValueChange={v => update('notificationsEnabled', v)}
+            trackColor={{ true: 'rgba(0,212,255,0.5)', false: 'rgba(255,255,255,0.1)' }}
+            thumbColor={settings.notificationsEnabled ? '#00D4FF' : '#555'}
+          />
+        </View>
       </View>
 
-      <Text style={[styles.sectionLabel, { marginTop: 24 }]}>ALERT THRESHOLD</Text>
-      <View style={styles.intervalRow}>
-        {[1, 2, 3, 5].map(d => (
-          <TouchableOpacity
-            key={d}
-            style={[styles.intervalBtn, settings.notifyThresholdDays === d && styles.intervalBtnActive]}
-            onPress={() => update('notifyThresholdDays', d)}
-          >
-            <Text style={[styles.intervalText, settings.notifyThresholdDays === d && styles.intervalTextActive]}>
-              {d}D
-            </Text>
-          </TouchableOpacity>
-        ))}
+      {/* Alert threshold */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardIcon}>⚠️</Text>
+          <View>
+            <Text style={styles.cardTitle}>Alert Threshold</Text>
+            <Text style={styles.cardHint}>Warn me when items have this many days left</Text>
+          </View>
+        </View>
+        <View style={styles.pillRow}>
+          {[1, 2, 3, 5].map(d => {
+            const active = settings.notifyThresholdDays === d;
+            return (
+              <TouchableOpacity
+                key={d}
+                style={[styles.pill, active && styles.pillActive]}
+                onPress={() => update('notifyThresholdDays', d)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.pillText, active && styles.pillTextActive]}>{d}d</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
+      {/* Saved toast */}
       {saved && (
-        <View style={styles.savedBadge}>
-          <Text style={styles.savedText}>✓ SETTINGS SAVED</Text>
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>✓  Settings saved</Text>
         </View>
       )}
+
     </HudScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionLabel: { color: 'rgba(0,212,255,0.45)', fontSize: 9, letterSpacing: 2, marginBottom: 12 },
-  intervalRow: { flexDirection: 'row', gap: 8 },
-  intervalBtn: { borderWidth: 1, borderColor: 'rgba(0,212,255,0.2)', paddingHorizontal: 18, paddingVertical: 9 },
-  intervalBtnActive: { borderColor: '#00D4FF', backgroundColor: 'rgba(0,212,255,0.12)' },
-  intervalText: { color: 'rgba(0,212,255,0.4)', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  intervalTextActive: { color: '#00D4FF' },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,212,255,0.15)', padding: 14 },
-  toggleLabel: { color: '#E0F7FF', fontSize: 11, letterSpacing: 1 },
-  savedBadge: { marginTop: 28, borderWidth: 1, borderColor: '#00FF88', padding: 12, alignItems: 'center' },
-  savedText: { color: '#00FF88', fontSize: 11, fontWeight: '700', letterSpacing: 2 },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 14,
+  },
+  cardIcon: { fontSize: 22 },
+  cardTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  cardHint: { color: 'rgba(255,255,255,0.35)', fontSize: 12, marginTop: 2 },
+
+  pillRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  pill: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,212,255,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    backgroundColor: 'rgba(0,212,255,0.04)',
+    minWidth: 52,
+    alignItems: 'center',
+  },
+  pillWide: { minWidth: 90 },
+  pillActive: { borderColor: '#00D4FF', backgroundColor: 'rgba(0,212,255,0.15)' },
+  pillText: { color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: '600' },
+  pillTextActive: { color: '#00D4FF' },
+
+  toast: {
+    backgroundColor: 'rgba(0,255,136,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,255,136,0.3)',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  toastText: { color: '#00FF88', fontSize: 14, fontWeight: '600' },
 });

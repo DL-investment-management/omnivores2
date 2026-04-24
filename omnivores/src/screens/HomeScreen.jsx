@@ -6,14 +6,18 @@ import {
 
 const { width: W } = Dimensions.get('window');
 
-function Ring({ size, duration, delay = 0, opacity = 0.18 }) {
+/* ── Spinning ring ─────────────────────────────────────────────────────────── */
+function Ring({ size, duration, delay = 0, opacity = 0.18, reverse = false }) {
   const spin = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
       Animated.timing(spin, { toValue: 1, duration, delay, easing: Easing.linear, useNativeDriver: true })
     ).start();
   }, []);
-  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const rotate = spin.interpolate({
+    inputRange: [0, 1],
+    outputRange: reverse ? ['360deg', '0deg'] : ['0deg', '360deg'],
+  });
   return (
     <Animated.View style={[styles.ring, {
       width: size, height: size, borderRadius: size / 2,
@@ -22,6 +26,7 @@ function Ring({ size, duration, delay = 0, opacity = 0.18 }) {
   );
 }
 
+/* ── Typewriter ────────────────────────────────────────────────────────────── */
 function TypeWriter({ text, style, speed = 55, onDone }) {
   const [displayed, setDisplayed] = useState('');
   useEffect(() => {
@@ -34,48 +39,59 @@ function TypeWriter({ text, style, speed = 55, onDone }) {
     }, speed);
     return () => clearInterval(id);
   }, [text]);
-  return <Text style={style}>{displayed}<Text style={{ opacity: 0.5 }}>_</Text></Text>;
+  return <Text style={style}>{displayed}<Text style={{ opacity: 0.4 }}>|</Text></Text>;
 }
 
-function BootLine({ text, delay, color = '#00D4FF' }) {
+/* ── Boot line ─────────────────────────────────────────────────────────────── */
+function BootLine({ text, delay, color = 'rgba(0,212,255,0.7)' }) {
   const fade = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(fade, { toValue: 1, duration: 200, delay, useNativeDriver: true }).start();
+    Animated.timing(fade, { toValue: 1, duration: 250, delay, useNativeDriver: true }).start();
   }, []);
   return <Animated.Text style={[styles.bootLine, { color, opacity: fade }]}>{text}</Animated.Text>;
 }
 
+/* ── Data ──────────────────────────────────────────────────────────────────── */
 const FEATURES = [
-  { icon: '⬡', title: 'REAL-TIME SCAN',    desc: 'Live camera analysis of your fridge contents' },
-  { icon: '⬡', title: 'EXPIRY TRACKING',   desc: 'AI estimates days left on every item' },
-  { icon: '⬡', title: 'CONDITION RATING',  desc: 'Fresh → Good → Aging → Critical status' },
-  { icon: '⬡', title: 'RECIPE ENGINE',     desc: '3 recipes generated from items expiring soonest' },
-  { icon: '⬡', title: 'FRIDGE VAULT',      desc: 'Save and compare scans over time' },
-  { icon: '⬡', title: 'AUTO-SCAN MODE',    desc: 'Continuous scan every 8 seconds' },
+  { icon: '📷', title: 'Real-Time Scan',      desc: 'Live camera analysis of fridge contents in seconds' },
+  { icon: '⏱',  title: 'Expiry Tracking',     desc: 'AI estimates exact days left on every item' },
+  { icon: '🟢', title: 'Condition Rating',    desc: 'Fresh → Good → Aging → Critical status for each item' },
+  { icon: '🍳', title: 'Recipe Engine',       desc: 'Personalized recipes that use what\'s expiring first' },
+  { icon: '🗄',  title: 'Fridge Vault',        desc: 'Save, compare and track scans over time' },
+  { icon: '🛒', title: 'Smart Grocery List',  desc: 'AI-generated restocking list based on your fridge' },
 ];
 
 const BOOT_LINES = [
-  { text: '> INITIALIZING OMNIVORES SYSTEM...', delay: 200 },
-  { text: '> LOADING VISION PROTOCOLS...',      delay: 700 },
-  { text: '> GEMINI NEURAL LINK: ESTABLISHED',  delay: 1200 },
-  { text: '> FOOD ANALYSIS MODULE: ONLINE',     delay: 1700 },
-  { text: '> RECIPE ENGINE: ONLINE',            delay: 2100 },
-  { text: '> ALL SYSTEMS NOMINAL',              delay: 2500, color: '#00FF88' },
+  { text: '▸  Initializing Omnivores…',         delay: 200 },
+  { text: '▸  Vision protocols loaded',          delay: 700 },
+  { text: '▸  Gemini neural link: established',  delay: 1200 },
+  { text: '▸  Food analysis module: online',     delay: 1700 },
+  { text: '▸  Recipe engine: online',            delay: 2100 },
+  { text: '✓  All systems nominal',              delay: 2500, color: '#00FF88' },
 ];
 
+const NAV_TABS = [
+  { icon: '👤', label: 'Profile',      key: 'profile' },
+  { icon: '✉️',  label: 'Contact',      key: 'contact' },
+  { icon: '❄️',  label: 'Vault',        key: 'vault' },
+  { icon: '⚙️',  label: 'Settings',    key: 'settings' },
+];
+
+/* ── Component ─────────────────────────────────────────────────────────────── */
 export default function HomeScreen({ onStart, onNav }) {
   const [phase, setPhase] = useState('boot');
-  const btnScale  = useRef(new Animated.Value(0)).current;
+  const btnScale   = useRef(new Animated.Value(0)).current;
   const arcOpacity = useRef(new Animated.Value(0)).current;
-  const arcScale   = useRef(new Animated.Value(0.6)).current;
-  const glowPulse  = useRef(new Animated.Value(0.5)).current;
+  const arcScale   = useRef(new Animated.Value(0.7)).current;
+  const glowPulse  = useRef(new Animated.Value(0.6)).current;
+  const [activeNav, setActiveNav] = useState(null);
 
   useEffect(() => {
     const t = setTimeout(() => {
       setPhase('title');
       Animated.parallel([
-        Animated.spring(arcScale,   { toValue: 1, tension: 50, friction: 8, useNativeDriver: true }),
-        Animated.timing(arcOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(arcScale,   { toValue: 1, tension: 55, friction: 8, useNativeDriver: true }),
+        Animated.timing(arcOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
       ]).start();
     }, 3200);
     return () => clearTimeout(t);
@@ -83,91 +99,111 @@ export default function HomeScreen({ onStart, onNav }) {
 
   useEffect(() => {
     if (phase !== 'ready') return;
-    Animated.spring(btnScale, { toValue: 1, tension: 60, friction: 8, useNativeDriver: true }).start();
+    Animated.spring(btnScale, { toValue: 1, tension: 60, friction: 7, useNativeDriver: true }).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(glowPulse, { toValue: 1,   duration: 1000, useNativeDriver: true }),
-        Animated.timing(glowPulse, { toValue: 0.5, duration: 1000, useNativeDriver: true }),
+        Animated.timing(glowPulse, { toValue: 1,   duration: 1100, useNativeDriver: true }),
+        Animated.timing(glowPulse, { toValue: 0.6, duration: 1100, useNativeDriver: true }),
       ])
     ).start();
   }, [phase]);
 
+  function handleNav(key) {
+    setActiveNav(key);
+    if (key === 'contact') {
+      Linking.openURL('mailto:donaldliang45@gmail.com');
+      setTimeout(() => setActiveNav(null), 600);
+    } else {
+      onNav?.(key);
+    }
+  }
+
   return (
     <View style={styles.root}>
-      {/* Grid */}
+      {/* Subtle grid */}
       <View style={styles.gridOverlay} pointerEvents="none">
-        {Array.from({ length: 14 }).map((_, i) => <View key={`h${i}`} style={[styles.gridLine, { top: `${(100 / 14) * i}%` }]} />)}
-        {Array.from({ length: 10 }).map((_, i) => <View key={`v${i}`} style={[styles.gridCol,  { left: `${(100 / 10) * i}%` }]} />)}
+        {Array.from({ length: 12 }).map((_, i) => (
+          <View key={`h${i}`} style={[styles.gridLine, { top: `${(100 / 12) * i}%` }]} />
+        ))}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <View key={`v${i}`} style={[styles.gridCol, { left: `${(100 / 8) * i}%` }]} />
+        ))}
       </View>
 
-      {/* Corner brackets */}
-      <View style={[styles.bracket, styles.bTL]}><View style={styles.bH} /><View style={styles.bV} /></View>
-      <View style={[styles.bracket, styles.bTR]}><View style={styles.bH} /><View style={[styles.bV, { alignSelf: 'flex-end' }]} /></View>
-      <View style={[styles.bracket, styles.bBL]}><View style={styles.bV} /><View style={styles.bH} /></View>
-      <View style={[styles.bracket, styles.bBR]}><View style={[styles.bV, { alignSelf: 'flex-end' }]} /><View style={styles.bH} /></View>
-
-      {/* Scrollable main content */}
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
-        {/* Boot phase */}
+      {/* Scrollable content */}
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Boot phase ── */}
         {phase === 'boot' && (
           <View style={styles.bootContainer}>
-            {BOOT_LINES.map((l, i) => <BootLine key={i} {...l} />)}
+            <View style={styles.bootCard}>
+              {BOOT_LINES.map((l, i) => <BootLine key={i} {...l} />)}
+            </View>
           </View>
         )}
 
-        {/* Hero */}
+        {/* ── Hero ── */}
         {phase !== 'boot' && (
           <Animated.View style={[styles.hero, { opacity: arcOpacity, transform: [{ scale: arcScale }] }]}>
+
+            {/* Arc reactor */}
             <View style={styles.ringsWrap} pointerEvents="none">
-              <Ring size={260} duration={20000} opacity={0.08} />
-              <Ring size={190} duration={12000} delay={500} opacity={0.14} />
-              <Ring size={130} duration={7000}  delay={200} opacity={0.22} />
-              <Ring size={72}  duration={4000}  opacity={0.35} />
-              <View style={styles.arcOuter}><View style={styles.arcMid}><View style={styles.arcInner} /></View></View>
+              <Ring size={280} duration={22000} opacity={0.06} />
+              <Ring size={210} duration={14000} delay={400} opacity={0.10} reverse />
+              <Ring size={150} duration={8000}  delay={200} opacity={0.18} />
+              <Ring size={88}  duration={4500}  opacity={0.30} />
+              <View style={styles.arcOuter}>
+                <View style={styles.arcMid}>
+                  <View style={styles.arcInner} />
+                </View>
+              </View>
             </View>
 
-            <Text style={styles.eyebrow}>// STARK KITCHEN TECH</Text>
+            {/* Text */}
+            <Text style={styles.eyebrow}>FRIDGE INTELLIGENCE SYSTEM</Text>
             {phase === 'title' && (
-              <TypeWriter text="OMNIVORES" style={styles.title} speed={80} onDone={() => setPhase('ready')} />
+              <TypeWriter text="OMNIVORES" style={styles.title} speed={75} onDone={() => setPhase('ready')} />
             )}
             {phase === 'ready' && <Text style={styles.title}>OMNIVORES</Text>}
-            <Text style={styles.subtitle}>FRIDGE INTELLIGENCE SYSTEM</Text>
+            <Text style={styles.tagline}>Know what's in your fridge. Never waste food again.</Text>
 
+            {/* Stats pills */}
             <View style={styles.statsRow}>
               {[
-                { label: 'SCAN MODE', value: 'REAL-TIME' },
-                { label: 'AI ENGINE', value: 'GEMINI 2.0' },
-                { label: 'STATUS',    value: 'ONLINE' },
+                { label: 'AI Engine',  value: 'Gemini 2.0' },
+                { label: 'Scan Mode',  value: 'Real-Time' },
+                { label: 'Status',     value: '● Online',  green: true },
               ].map((s, i) => (
-                <View key={i} style={styles.statBox}>
-                  <Text style={styles.statValue}>{s.value}</Text>
+                <View key={i} style={styles.statPill}>
+                  <Text style={[styles.statValue, s.green && { color: '#00FF88' }]}>{s.value}</Text>
                   <Text style={styles.statLabel}>{s.label}</Text>
                 </View>
               ))}
             </View>
 
+            {/* CTA button */}
             {phase === 'ready' && (
-              <Animated.View style={{ transform: [{ scale: btnScale }] }}>
-                <TouchableOpacity style={styles.launchBtn} onPress={onStart} activeOpacity={0.8}>
-                  <Animated.View style={[styles.launchGlow, { opacity: glowPulse }]} />
-                  <Text style={styles.launchText}>[ INITIALIZE SCAN ]</Text>
+              <Animated.View style={[styles.ctaWrap, { transform: [{ scale: btnScale }] }]}>
+                <TouchableOpacity style={styles.ctaBtn} onPress={onStart} activeOpacity={0.82}>
+                  <Animated.View style={[styles.ctaGlow, { opacity: glowPulse }]} />
+                  <Text style={styles.ctaIcon}>📷</Text>
+                  <Text style={styles.ctaText}>Scan My Fridge</Text>
                 </TouchableOpacity>
               </Animated.View>
             )}
           </Animated.View>
         )}
 
-        {/* Features list */}
+        {/* ── Features grid ── */}
         {phase === 'ready' && (
           <View style={styles.featuresSection}>
-            <View style={styles.featuresDivider} />
-            <Text style={styles.featuresHeader}>// SYSTEM CAPABILITIES</Text>
+            <Text style={styles.sectionLabel}>WHAT IT DOES</Text>
             <View style={styles.featuresGrid}>
               {FEATURES.map((f, i) => (
                 <View key={i} style={styles.featureCard}>
-                  <View style={styles.featureCardTL} /><View style={styles.featureCardBR} />
-                  <Text style={styles.featureIcon}>{f.icon}</Text>
+                  <Text style={styles.featureEmoji}>{f.icon}</Text>
                   <Text style={styles.featureTitle}>{f.title}</Text>
                   <Text style={styles.featureDesc}>{f.desc}</Text>
                 </View>
@@ -176,113 +212,166 @@ export default function HomeScreen({ onStart, onNav }) {
           </View>
         )}
 
-        <View style={{ height: 120 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Nav bar — absolutely pinned to bottom */}
+      {/* ── Nav bar ── */}
       <View style={styles.navBar}>
-        <View style={styles.navDivider} />
-        <View style={styles.navTabs}>
-          {[
-            { icon: '◈', label: 'PROFILE',      onPress: () => onNav?.('profile') },
-            { icon: '✉', label: 'CONTACT',      onPress: () => Linking.openURL('mailto:donaldliang45@gmail.com') },
-            { icon: '❄', label: 'FRIDGE VAULT', onPress: () => onNav?.('vault') },
-            { icon: '⚙', label: 'SETTINGS',     onPress: () => onNav?.('settings') },
-          ].map((tab, i) => (
-            <TouchableOpacity key={i} style={styles.navTab} onPress={tab.onPress} activeOpacity={0.7}>
+        {NAV_TABS.map((tab) => {
+          const active = activeNav === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.navTab, active && styles.navTabActive]}
+              onPress={() => handleNav(tab.key)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.navIcon}>{tab.icon}</Text>
-              <Text style={styles.navLabel}>{tab.label}</Text>
+              <Text style={[styles.navLabel, active && styles.navLabelActive]}>{tab.label}</Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          );
+        })}
       </View>
     </View>
   );
 }
 
+/* ── Styles ────────────────────────────────────────────────────────────────── */
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    minHeight: '100vh',
-    backgroundColor: '#000A1A',
+  root: { flex: 1, minHeight: '100vh', backgroundColor: '#060B18' },
+
+  gridOverlay: { ...StyleSheet.absoluteFillObject },
+  gridLine: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,212,255,0.03)' },
+  gridCol:  { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(0,212,255,0.03)' },
+
+  scroll: { alignItems: 'center', paddingTop: 48, paddingBottom: 24 },
+
+  /* Boot */
+  bootContainer: { width: '100%', maxWidth: 460, paddingHorizontal: 24, marginTop: 80 },
+  bootCard: {
+    backgroundColor: 'rgba(0,212,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,212,255,0.12)',
+    borderRadius: 16,
+    padding: 24,
   },
+  bootLine: { fontFamily: 'monospace', fontSize: 13, letterSpacing: 0.5, marginBottom: 8 },
 
-  gridOverlay: { ...StyleSheet.absoluteFillObject, pointerEvents: 'none' },
-  gridLine: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,212,255,0.04)' },
-  gridCol:  { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(0,212,255,0.04)' },
+  /* Hero */
+  hero: { alignItems: 'center', width: '100%', paddingHorizontal: 24 },
 
-  bracket: { position: 'absolute', width: 24, height: 24, zIndex: 10 },
-  bTL: { top: 20, left: 20 },
-  bTR: { top: 20, right: 20, alignItems: 'flex-end' },
-  bBL: { bottom: 80, left: 20, justifyContent: 'flex-end' },
-  bBR: { bottom: 80, right: 20, alignItems: 'flex-end', justifyContent: 'flex-end' },
-  bH: { height: 2, width: 24, backgroundColor: '#00D4FF', opacity: 0.5 },
-  bV: { width: 2, height: 14, backgroundColor: '#00D4FF', opacity: 0.5 },
-
-  scroll: {
-    alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 20,
-  },
-
-  bootContainer: { padding: 32, width: '100%', maxWidth: 480, marginTop: 80 },
-  bootLine: { fontFamily: 'monospace', fontSize: 12, letterSpacing: 1, marginBottom: 6 },
-
-  // Hero
-  hero: { alignItems: 'center', width: '100%', paddingHorizontal: 32 },
-  ringsWrap: { width: 260, height: 260, justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
+  ringsWrap: { width: 280, height: 280, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   ring: { position: 'absolute', borderWidth: 1, borderStyle: 'dashed', borderColor: '#00D4FF' },
+
   arcOuter: {
-    width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: '#00D4FF',
-    justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,212,255,0.08)',
-    shadowColor: '#00D4FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 14,
+    width: 54, height: 54, borderRadius: 27,
+    borderWidth: 2, borderColor: '#00D4FF',
+    justifyContent: 'center', alignItems: 'center',
+    backgroundColor: 'rgba(0,212,255,0.10)',
+    shadowColor: '#00D4FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 18,
   },
-  arcMid: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(0,212,255,0.6)', justifyContent: 'center', alignItems: 'center' },
-  arcInner: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#00D4FF', shadowColor: '#00D4FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 10 },
+  arcMid: {
+    width: 36, height: 36, borderRadius: 18,
+    borderWidth: 1, borderColor: 'rgba(0,212,255,0.5)',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  arcInner: {
+    width: 16, height: 16, borderRadius: 8, backgroundColor: '#00D4FF',
+    shadowColor: '#00D4FF', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 12,
+  },
 
-  eyebrow: { color: 'rgba(0,212,255,0.45)', fontSize: 10, letterSpacing: 3, marginBottom: 8 },
-  title: { color: '#00D4FF', fontSize: 48, fontWeight: '900', letterSpacing: 10, textShadowColor: '#00D4FF', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20 },
-  subtitle: { color: 'rgba(0,212,255,0.5)', fontSize: 11, letterSpacing: 4, marginTop: 6, marginBottom: 28 },
+  eyebrow: { color: 'rgba(0,212,255,0.5)', fontSize: 11, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 52,
+    fontWeight: '900',
+    letterSpacing: 8,
+    textShadowColor: '#00D4FF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 24,
+    marginBottom: 10,
+  },
+  tagline: { color: 'rgba(255,255,255,0.45)', fontSize: 14, textAlign: 'center', marginBottom: 28, lineHeight: 20 },
 
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 32 },
-  statBox: { alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,212,255,0.2)', paddingHorizontal: 14, paddingVertical: 10, minWidth: 90 },
-  statValue: { color: '#00D4FF', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  statLabel: { color: 'rgba(0,212,255,0.4)', fontSize: 8, letterSpacing: 1.5, marginTop: 3 },
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 32, flexWrap: 'wrap', justifyContent: 'center' },
+  statPill: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,212,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,212,255,0.15)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minWidth: 90,
+  },
+  statValue: { color: '#00D4FF', fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
+  statLabel: { color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 3 },
 
-  launchBtn: { borderWidth: 1, borderColor: '#00D4FF', paddingHorizontal: 36, paddingVertical: 16, alignItems: 'center', position: 'relative', overflow: 'hidden', marginBottom: 16 },
-  launchGlow: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,212,255,0.12)' },
-  launchText: { color: '#00D4FF', fontSize: 14, fontWeight: '700', letterSpacing: 3 },
+  ctaWrap: { width: '100%', maxWidth: 340, marginBottom: 12 },
+  ctaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#00D4FF',
+    paddingVertical: 18,
+    backgroundColor: 'rgba(0,212,255,0.08)',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  ctaGlow: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,212,255,0.14)' },
+  ctaIcon: { fontSize: 22 },
+  ctaText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
 
-  // Features
-  featuresSection: { width: '100%', maxWidth: 860, paddingHorizontal: 32, marginTop: 20 },
-  featuresDivider: { height: 1, backgroundColor: 'rgba(0,212,255,0.15)', marginBottom: 20 },
-  featuresHeader: { color: 'rgba(0,212,255,0.45)', fontSize: 10, letterSpacing: 3, marginBottom: 20 },
+  /* Features */
+  featuresSection: { width: '100%', maxWidth: 880, paddingHorizontal: 20, marginTop: 12 },
+  sectionLabel: {
+    color: 'rgba(0,212,255,0.4)',
+    fontSize: 11,
+    letterSpacing: 3,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
   featuresGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   featureCard: {
-    flex: 1, minWidth: 220,
-    backgroundColor: 'rgba(0,20,50,0.5)',
-    borderWidth: 1, borderColor: 'rgba(0,212,255,0.15)',
-    padding: 16, position: 'relative',
+    flex: 1,
+    minWidth: 200,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 16,
+    padding: 18,
   },
-  featureCardTL: { position: 'absolute', top: -1, left: -1, width: 8, height: 8, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#00D4FF' },
-  featureCardBR: { position: 'absolute', bottom: -1, right: -1, width: 8, height: 8, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#00D4FF' },
-  featureIcon:  { color: '#00D4FF', fontSize: 16, marginBottom: 8, opacity: 0.7 },
-  featureTitle: { color: '#E0F7FF', fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 6 },
-  featureDesc:  { color: 'rgba(0,212,255,0.4)', fontSize: 11, lineHeight: 16 },
+  featureEmoji: { fontSize: 24, marginBottom: 10 },
+  featureTitle: { color: '#FFFFFF', fontSize: 14, fontWeight: '700', marginBottom: 6 },
+  featureDesc:  { color: 'rgba(255,255,255,0.45)', fontSize: 12, lineHeight: 18 },
 
-  // Nav bar
+  /* Nav */
   navBar: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,
-    backgroundColor: 'rgba(0,8,20,0.92)',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'rgba(6,11,24,0.96)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,212,255,0.2)',
-    paddingBottom: 16,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingTop: 10,
+    paddingBottom: 18,
+    paddingHorizontal: 8,
     zIndex: 100,
   },
-  navDivider: { height: 1, backgroundColor: 'rgba(0,212,255,0.08)', marginBottom: 0 },
-  navTabs: { flexDirection: 'row', justifyContent: 'space-evenly', paddingTop: 12, paddingHorizontal: 16 },
-  navTab: { alignItems: 'center', gap: 4, paddingHorizontal: 20, paddingVertical: 4 },
-  navIcon:  { fontSize: 18, color: '#00D4FF', opacity: 0.8 },
-  navLabel: { color: 'rgba(0,212,255,0.6)', fontSize: 9, fontWeight: '700', letterSpacing: 1.5 },
+  navTab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  navTabActive: { backgroundColor: 'rgba(0,212,255,0.1)' },
+  navIcon:  { fontSize: 20, marginBottom: 4 },
+  navLabel: { color: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: '600' },
+  navLabelActive: { color: '#00D4FF' },
 });

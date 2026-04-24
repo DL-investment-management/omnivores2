@@ -164,10 +164,11 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
       {/* Food overlays */}
       <FoodOverlay items={items} />
 
-      {/* Back to home */}
+      {/* Back button */}
       {onBack && (
-        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backText}>‹ HOME</Text>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.8}>
+          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>Home</Text>
         </TouchableOpacity>
       )}
 
@@ -175,53 +176,59 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
       <TouchableOpacity
         style={[styles.autoBtn, autoScan && styles.autoBtnActive]}
         onPress={() => setAutoScan(v => !v)}
+        activeOpacity={0.8}
       >
-        <Text style={styles.autoBtnText}>{autoScan ? '⟳ AUTO: ON' : '⟳ AUTO: OFF'}</Text>
+        <Text style={styles.autoBtnText}>{autoScan ? '⟳  Auto: On' : '⟳  Auto: Off'}</Text>
       </TouchableOpacity>
 
       {/* Bottom controls */}
       <View style={styles.controls}>
+        {/* Quick action row */}
         {items.length > 0 && (
           <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionBtn} onPress={onGrocery}>
-              <Text style={styles.actionBtnText}>🛒 LIST</Text>
+            <TouchableOpacity style={styles.actionBtn} onPress={onGrocery} activeOpacity={0.8}>
+              <Text style={styles.actionBtnIcon}>🛒</Text>
+              <Text style={styles.actionBtnText}>Grocery</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={onMealPlan}>
-              <Text style={styles.actionBtnText}>📅 PLAN</Text>
+            <TouchableOpacity style={styles.actionBtn} onPress={onMealPlan} activeOpacity={0.8}>
+              <Text style={styles.actionBtnIcon}>📅</Text>
+              <Text style={styles.actionBtnText}>Meal Plan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnRecipe, loadingRecipes && styles.btnDisabled]}
+              onPress={handleGetRecipes}
+              disabled={loadingRecipes}
+              activeOpacity={0.8}
+            >
+              {loadingRecipes
+                ? <ActivityIndicator color="#00D4FF" size="small" />
+                : <>
+                    <Text style={styles.actionBtnIcon}>🍳</Text>
+                    <Text style={styles.actionBtnText}>Recipes</Text>
+                  </>
+              }
             </TouchableOpacity>
           </View>
         )}
-        {items.length > 0 && (
-          <TouchableOpacity
-            style={[styles.recipesBtn, loadingRecipes && styles.btnDisabled]}
-            onPress={handleGetRecipes}
-            disabled={loadingRecipes}
-          >
-            {loadingRecipes
-              ? <ActivityIndicator color="#00D4FF" size="small" />
-              : <Text style={styles.recipesBtnText}>[ COMPUTE RECIPES ]</Text>
-            }
-          </TouchableOpacity>
-        )}
 
+        {/* Main scan button */}
         <TouchableOpacity
           style={[styles.scanBtn, scanning && styles.btnDisabled]}
           onPress={runScan}
           disabled={scanning}
+          activeOpacity={0.85}
         >
-          <View style={styles.scanBtnInner}>
-            {scanning
-              ? <ActivityIndicator color="#00D4FF" size="small" />
-              : <Text style={styles.scanBtnText}>SCAN</Text>
-            }
-          </View>
+          {scanning
+            ? <ActivityIndicator color="#00D4FF" size="small" />
+            : <Text style={styles.scanBtnText}>SCAN</Text>
+          }
         </TouchableOpacity>
 
-        {/* Bottom HUD info bar */}
+        {/* Info bar */}
         <View style={styles.infoBar} pointerEvents="none">
-          <Text style={styles.infoText}>OMNIVORES v1.0</Text>
-          <Text style={styles.infoText}>●</Text>
-          <Text style={styles.infoText}>{items.length} ITEMS</Text>
+          <Text style={styles.infoText}>OMNIVORES</Text>
+          <View style={styles.infoDot} />
+          <Text style={styles.infoText}>{items.length} items detected</Text>
         </View>
       </View>
 
@@ -301,74 +308,89 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 52,
     left: 16,
-    backgroundColor: 'rgba(0,8,25,0.65)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(6,11,24,0.75)',
     borderWidth: 1,
     borderColor: 'rgba(0,212,255,0.3)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
-  backText: { color: '#00D4FF', fontSize: 9, fontWeight: '700', letterSpacing: 1.5 },
+  backArrow: { color: '#00D4FF', fontSize: 15, lineHeight: 17 },
+  backText:  { color: '#00D4FF', fontSize: 12, fontWeight: '600' },
 
-  // Auto btn
   autoBtn: {
     position: 'absolute',
     top: 52,
     right: 16,
-    backgroundColor: 'rgba(0,8,25,0.65)',
+    backgroundColor: 'rgba(6,11,24,0.75)',
     borderWidth: 1,
-    borderColor: 'rgba(0,212,255,0.3)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderColor: 'rgba(0,212,255,0.25)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
   autoBtnActive: { borderColor: '#00D4FF', backgroundColor: 'rgba(0,212,255,0.1)' },
-  autoBtnText: { color: '#00D4FF', fontSize: 9, fontWeight: '700', letterSpacing: 1.5 },
+  autoBtnText: { color: '#00D4FF', fontSize: 12, fontWeight: '600' },
 
-  // Controls
   controls: {
     position: 'absolute',
-    bottom: 36,
+    bottom: 32,
     left: 0, right: 0,
     alignItems: 'center',
     gap: 12,
+    paddingHorizontal: 20,
   },
+
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+    maxWidth: 360,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(6,11,24,0.82)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,212,255,0.3)',
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
+  actionBtnRecipe: { borderColor: 'rgba(0,212,255,0.5)' },
+  actionBtnIcon: { fontSize: 15 },
+  actionBtnText: { color: '#00D4FF', fontSize: 12, fontWeight: '600' },
+
   scanBtn: {
-    width: 72, height: 72,
-    borderRadius: 36,
-    borderWidth: 2,
+    width: 76, height: 76,
+    borderRadius: 38,
+    borderWidth: 2.5,
     borderColor: '#00D4FF',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,30,80,0.55)',
+    backgroundColor: 'rgba(0,212,255,0.1)',
     shadowColor: '#00D4FF',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
-    shadowRadius: 14,
+    shadowRadius: 18,
     elevation: 10,
   },
-  scanBtnInner: { alignItems: 'center', justifyContent: 'center' },
-  scanBtnText: { color: '#00D4FF', fontSize: 11, fontWeight: '700', letterSpacing: 2 },
+  scanBtnText: { color: '#00D4FF', fontSize: 12, fontWeight: '800', letterSpacing: 2 },
   btnDisabled: { opacity: 0.3 },
 
-  actionRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
-  actionBtn: {
-    backgroundColor: 'rgba(0,8,25,0.7)',
-    borderWidth: 1, borderColor: 'rgba(0,212,255,0.35)',
-    paddingHorizontal: 16, paddingVertical: 8,
-  },
-  actionBtnText: { color: '#00D4FF', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  recipesBtn: {
-    backgroundColor: 'rgba(0,8,25,0.7)',
-    borderWidth: 1,
-    borderColor: '#00D4FF',
-    paddingHorizontal: 22,
-    paddingVertical: 10,
-    minWidth: 180,
+  infoBar: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
   },
-  recipesBtnText: { color: '#00D4FF', fontSize: 12, fontWeight: '700', letterSpacing: 1.5 },
-
-  infoBar: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  infoText: { color: 'rgba(0,212,255,0.35)', fontSize: 9, letterSpacing: 1.5 },
+  infoText: { color: 'rgba(0,212,255,0.4)', fontSize: 10, letterSpacing: 1 },
+  infoDot:  { width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(0,212,255,0.3)' },
 
   // Permission screen
   hudBox: {
