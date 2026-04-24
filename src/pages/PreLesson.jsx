@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MascotAvatar from "../components/MascotAvatar";
-import { getLessonById, isProUser, isUnitFree } from "@/lib/appData";
+import { getLessonById } from "@/lib/appData";
 
 export default function PreLesson() {
   const { id } = useParams();
@@ -16,10 +16,6 @@ export default function PreLesson() {
     async function load() {
       try {
         const loaded = await getLessonById(id);
-        if (loaded && !isUnitFree(loaded.unit) && !isProUser()) {
-          navigate("/upgrade", { replace: true });
-          return;
-        }
         setLesson(loaded);
       } catch (e) {
         console.error("PreLesson load error:", e);

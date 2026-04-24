@@ -4,59 +4,192 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f97316" />
+    <meta name="theme-color" content="#6DC848" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Econ-Go" />
     <link rel="apple-touch-icon" href="/icon-192.svg" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QGSNZM3SRY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-QGSNZM3SRY');
+    </script>
+
+    <!-- Performance: preconnect to external origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+
     <!-- Primary SEO -->
-    <title>Econ-Go — Learn Economics One Lesson at a Time</title>
-    <meta name="description" content="Learn economics free — bite-sized lessons, daily streaks, and quizzes covering supply & demand, micro, macro, and more. Start in seconds. No experience needed." />
-    <meta name="keywords" content="economics, learn economics, economics app, supply and demand, microeconomics, macroeconomics, economics lessons, economics quiz" />
+    <title>Econ-Go — Learn Economics Free, One Lesson at a Time</title>
+    <meta name="description" content="Learn economics completely free — bite-sized lessons, daily streaks, and quizzes covering supply & demand, micro, macro, behavioral economics, personal finance, and more. No experience needed. Start in 30 seconds." />
+    <meta name="keywords" content="learn economics free, economics app, economics for beginners, supply and demand, microeconomics, macroeconomics, behavioral economics, personal finance, economics lessons, economics quiz, free economics course, gamified learning, economics education, market economics, game theory, international economics, economic history, learn finance online, economics streaks, daily economics lesson, economics leaderboard" />
     <link rel="canonical" href="https://econ-go.com" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="author" content="Econ-Go" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Open Graph (Facebook, iMessage, Slack, LinkedIn) -->
-    <meta property="og:title" content="Econ-Go — Learn Economics One Lesson at a Time" />
-    <meta property="og:description" content="Master economics the fun way. Bite-sized lessons, daily streaks, and a leaderboard — all free to start." />
+    <meta property="og:title" content="Econ-Go — Learn Economics Free, One Lesson at a Time" />
+    <meta property="og:description" content="Master economics the fun way — completely free. Bite-sized lessons, daily streaks, a global leaderboard, and 7 full units covering micro, macro, behavioral economics, personal finance, and more." />
     <meta property="og:url" content="https://econ-go.com" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Econ-Go" />
     <meta property="og:image" content="https://econ-go.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Econ-Go — Learn Economics One Lesson at a Time" />
+    <meta property="og:image:alt" content="Econ-Go — Free economics learning app with lessons, streaks, and leaderboard" />
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Econ-Go — Learn Economics One Lesson at a Time" />
-    <meta name="twitter:description" content="Master economics the fun way. Bite-sized lessons, daily streaks, and a leaderboard — all free to start." />
+    <meta name="twitter:title" content="Econ-Go — Learn Economics Free, One Lesson at a Time" />
+    <meta name="twitter:description" content="Master economics the fun way — completely free. 7 units, bite-sized lessons, daily streaks, and a global leaderboard." />
     <meta name="twitter:image" content="https://econ-go.com/og-image.png" />
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Econ-Go",
-      "url": "https://econ-go.com",
-      "description": "Master economics the fun way. Bite-sized lessons, daily streaks, and a leaderboard — all free to start.",
-      "applicationCategory": "EducationApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Econ-Go",
+        "url": "https://econ-go.com",
+        "description": "Learn economics completely free with bite-sized lessons, daily streaks, quizzes, and a global leaderboard. Covers supply & demand, microeconomics, macroeconomics, behavioral economics, personal finance, and more.",
+        "applicationCategory": "EducationApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "7 full economics units",
+          "Bite-sized lessons with quizzes",
+          "Daily streak tracking",
+          "Global leaderboard",
+          "Economics glossary",
+          "Curated reading library",
+          "Offline PWA support"
+        ],
+        "educationalUse": "Self Study",
+        "teaches": "Economics",
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": "student"
+        },
+        "about": {
+          "@type": "Thing",
+          "name": "Economics"
+        }
       },
-      "educationalUse": "Self Study",
-      "about": {
-        "@type": "Thing",
-        "name": "Economics"
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Econ-Go",
+        "url": "https://econ-go.com",
+        "logo": "https://econ-go.com/logo.png",
+        "description": "Econ-Go makes economics education free and fun through gamified daily lessons, streaks, and a global leaderboard.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "donaldliang45@gmail.com",
+          "contactType": "customer support"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": "Complete Economics Course",
+        "description": "A free, bite-sized economics course covering supply & demand, microeconomics, macroeconomics, personal finance, behavioral economics, international economics, and economic history.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Econ-Go",
+          "url": "https://econ-go.com"
+        },
+        "url": "https://econ-go.com",
+        "hasCourseInstance": {
+          "@type": "CourseInstance",
+          "courseMode": "online",
+          "courseWorkload": "PT5M"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "educationalLevel": "Beginner",
+        "teaches": [
+          "Supply and Demand",
+          "Microeconomics",
+          "Macroeconomics",
+          "Behavioral Economics",
+          "Personal Finance",
+          "International Economics",
+          "History of Economics"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Econ-Go really free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes — completely free. All 7 units, every lesson, the glossary, leaderboard, quests — everything. No credit card required, ever."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need any economics background to use Econ-Go?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "None at all. Lessons start from the absolute basics and build up gradually, so anyone can follow along — no prior economics knowledge required."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long does each economics lesson take?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most lessons take 3–5 minutes. They're designed to fit into your day — a commute, a break, or before bed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What economics topics does Econ-Go cover?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Econ-Go covers 7 full units: Supply & Demand, Microeconomics, Macroeconomics, Personal Finance, Behavioral Economics, International Economics, and History of Economics — plus a full glossary and curated reading library."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does the Econ-Go leaderboard work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Your rank is based on total XP. Complete lessons, maintain daily streaks, and claim quests to earn XP and climb the global leaderboard."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I install Econ-Go on my phone?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! On Android, tap the Install App button on the website. On iPhone, use Safari's Share menu and select Add to Home Screen. The app works offline too as a Progressive Web App (PWA)."
+            }
+          }
+        ]
       }
-    }
+    ]
     </script>
   </head>
   <body>

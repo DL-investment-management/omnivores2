@@ -32,10 +32,7 @@ export default function SignIn() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg mb-4">
-            <span className="text-primary-foreground font-heading font-black text-3xl">E</span>
-          </div>
-          <h1 className="text-2xl font-heading font-black text-foreground">Econ-Go</h1>
+          <img src="/logo.png" alt="Econ-Go" className="h-16 w-auto mb-4 drop-shadow-lg" />
           <p className="text-sm text-muted-foreground mt-1">Learn economics. One lesson at a time.</p>
         </div>
 

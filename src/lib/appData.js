@@ -128,7 +128,7 @@ export function initUserSession(email, fullName) {
   writeStoredJson(LOCAL_USER_KEY, {
     email,
     full_name: fullName || email.split("@")[0],
-    xp: 0,
+    xp: 1,
     capital: 25,
     streak: 0,
     rank: getRank(0),
@@ -385,6 +385,10 @@ export async function createPurchase(purchaseRecord) {
   return clone(purchaseRecord);
 }
 
+export function getPurchases() {
+  return readStoredJson(LOCAL_PURCHASES_KEY, []);
+}
+
 export function getUnlockedAuthorIds() {
   return readStoredJson(LOCAL_UNLOCKED_AUTHORS_KEY, []);
 }
@@ -421,87 +425,3 @@ export function subscribeToUnlockedAuthors(callback) {
   };
 }
 
-// ── Dev console helpers (access via  econ  in browser DevTools) ──
-if (typeof window !== "undefined" && import.meta.env.DEV) {
-  const _yesterday = () => new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-  window.econ = {
-    async status() {
-      const u = await getCurrentUser();
-      console.table({
-        name: u.full_name,
-        xp: u.xp,
-        capital: u.capital,
-        streak: u.streak,
-        last_active: u.last_active_date,
-        rank: u.rank,
-        avatar: u.avatar,
-      });
-      return u;
-    },
-
-    async setStreak(n) {
-      const u = await updateCurrentUser({ streak: n });
-      console.log(`Streak set to ${n}`);
-      return u;
-    },
-
-    async setXP(n) {
-      const u = await updateCurrentUser({ xp: n, rank: getRank(n) });
-      console.log(`XP set to ${n} (rank: ${u.rank})`);
-      return u;
-    },
-
-    async addXP(n) {
-      const u = await getCurrentUser();
-      return window.econ.setXP((u.xp || 0) + n);
-    },
-
-    async setCapital(n) {
-      const u = await updateCurrentUser({ capital: n });
-      console.log(`Capital set to ${n}`);
-      return u;
-    },
-
-    async addCapital(n) {
-      const u = await getCurrentUser();
-      return window.econ.setCapital((u.capital || 0) + n);
-    },
-
-    async simulateYesterday() {
-      const u = await updateCurrentUser({ last_active_date: _yesterday() });
-      console.log(`last_active_date set to yesterday (${_yesterday()}). Refresh to trigger streak increment.`);
-      return u;
-    },
-
-    async resetProgress() {
-      localStorage.removeItem(LOCAL_USER_KEY);
-      localStorage.removeItem(LOCAL_PROGRESS_KEY);
-      localStorage.removeItem(LOCAL_PURCHASES_KEY);
-      localStorage.removeItem(LOCAL_UNLOCKED_AUTHORS_KEY);
-      console.log("All progress wiped. Refresh the page.");
-    },
-
-    help() {
-      console.log(
-        "Econ-Go Dev Console\n" +
-        "-------------------\n" +
-        "  econ.status()            Show current user stats\n" +
-        "  econ.setStreak(5)        Set streak to 5\n" +
-        "  econ.setXP(500)          Set XP to 500\n" +
-        "  econ.addXP(100)          Add 100 XP\n" +
-        "  econ.setCapital(999)     Set capital to 999\n" +
-        "  econ.addCapital(50)      Add 50 capital\n" +
-        "  econ.simulateYesterday() Pretend last visit was yesterday (refresh to trigger streak)\n" +
-        "  econ.resetProgress()     Wipe all saved data (refresh after)\n" +
-        "  econ.setPro(true/false)  Toggle Pro status\n" +
-        "  econ.help()              Show this menu"
-      );
-    },
-
-    setPro(val) {
-      setPro(val);
-      console.log(`Pro status set to ${val}. Refresh the page.`);
-    },
-  };
-}

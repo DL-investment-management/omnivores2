@@ -1,48 +1,35 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Users, Mail, Crown, Link2, Zap, Target } from "lucide-react";
+import { Home, User, ShoppingBag, Trophy, Flame, BookMarked, Library, Target, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getCurrentUser, subscribeToCurrentUser, isProUser, syncProStatus, PRO_GATING_ENABLED, getEnergy, MAX_ENERGY } from "@/lib/appData";
+import { motion, AnimatePresence } from "framer-motion";
+import { getCurrentUser, subscribeToCurrentUser, syncProStatus, getUnlockedAuthorIds, getPurchases } from "@/lib/appData";
 import { getUnclaimedCount } from "@/lib/quests";
-
-const PRO_LOCKED_PATHS = ["/leaderboard", "/glossary", "/good-reads", "/shop"];
 
 const navItems = [
   { path: "/", icon: Home, label: "Learn" },
   { path: "/leaderboard", icon: Trophy, label: "Rank" },
   { path: "/glossary", icon: BookMarked, label: "Glossary" },
   { path: "/quests", icon: Target, label: "Quests" },
+  { path: "/good-reads", icon: Library, label: "Reads" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
   { path: "/profile", icon: User, label: "Profile" },
-  { path: "/upgrade", icon: Crown, label: "Pro" },
 ];
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [isPro, setIsPro] = useState(isProUser());
-  const [energy, setEnergy] = useState(() => getEnergy());
   const [unclaimedQuests, setUnclaimedQuests] = useState(0);
-
-  useEffect(() => {
-    const handler = (e) => setIsPro(e.detail);
-    window.addEventListener("econogo:pro-updated", handler);
-    return () => window.removeEventListener("econogo:pro-updated", handler);
-  }, []);
-
-  useEffect(() => {
-    const handler = (e) => setEnergy(e.detail);
-    window.addEventListener("econogo:energy-updated", handler);
-    const tick = setInterval(() => setEnergy(getEnergy()), 5 * 60 * 1000);
-    return () => {
-      window.removeEventListener("econogo:energy-updated", handler);
-      clearInterval(tick);
-    };
-  }, []);
+  const [navOpen, setNavOpen] = useState(false);
+  const [hasBoost, setHasBoost] = useState(false);
 
   useEffect(() => {
     const refresh = () => {
-      getCurrentUser().then((u) => setUnclaimedQuests(getUnclaimedCount(u?.streak || 0))).catch(() => {});
+      getCurrentUser().then((u) => setUnclaimedQuests(getUnclaimedCount({
+        streak: u?.streak || 0,
+        unlockedAuthors: getUnlockedAuthorIds(),
+        purchases: getPurchases(),
+      }))).catch(() => {});
     };
     refresh();
     window.addEventListener("econogo:quests-updated", refresh);
@@ -50,11 +37,24 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const checkBoost = () => {
+      const purchases = getPurchases();
+      setHasBoost(purchases.some(p => p.item_type === "xp_boost" && !p.used));
+    };
+    checkBoost();
+    window.addEventListener("econogo:user-updated", checkBoost);
+    return () => window.removeEventListener("econogo:user-updated", checkBoost);
+  }, []);
+
+  useEffect(() => {
     let subscribed = false;
     getCurrentUser()
       .then(u => {
         if (!subscribed) setUser(u);
-        // Verify Pro status against Supabase on every load
         if (u?.email) syncProStatus(u.email);
       })
       .catch(() => {});
@@ -68,38 +68,26 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* MVP Banner */}
-      <div className="fixed top-2 right-2 z-[100] border border-border bg-card/90 backdrop-blur-sm rounded-md px-2 py-1 pointer-events-none">
-        <span className="text-[10px] font-mono font-semibold text-muted-foreground tracking-wide">Minimum Viable Product</span>
-      </div>
       {/* Top Bar */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <img src="/logo.png" alt="Econ-Go" className="h-9 w-auto" />
+          </Link>
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-heading font-bold text-lg">E</span>
-              </div>
-              <span className="font-heading font-bold text-lg text-foreground">Econ-Go</span>
-            </Link>
-            {PRO_GATING_ENABLED && (isPro ? (
-              <span className="ml-2 flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sm cursor-default">
-                <Crown className="w-3.5 h-3.5" /> Pro
-              </span>
-            ) : (
-              <Link to="/upgrade" className="ml-2 flex items-center gap-1 bg-muted text-primary rounded-full px-3 py-1.5 text-xs font-bold shadow-sm border border-primary/30 hover:bg-primary/10 transition cursor-pointer">
-                Free Tier
-              </Link>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
+            {hasBoost && (
+              <motion.div
+                className="flex items-center gap-1 bg-yellow-400/20 border border-yellow-400/40 rounded-full px-2.5 py-1.5"
+                animate={{ scale: [1, 1.06, 1] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+              >
+                <span className="text-sm">⚡</span>
+                <span className="font-black text-xs font-heading text-yellow-500">2×</span>
+              </motion.div>
+            )}
             <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
               <Flame className="w-4 h-4 text-secondary" />
               <span className="font-bold text-sm font-heading">{streak}</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
-              <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <span className="font-bold text-sm font-heading">{energy}</span>
             </div>
             <div className="flex items-center gap-1.5 bg-muted rounded-full px-3 py-1.5">
               <span className="text-sm">💰</span>
@@ -110,12 +98,12 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pb-20">
+      <main className="flex-1 pb-6 sm:pb-20">
         <Outlet />
       </main>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
+      {/* Desktop Bottom Nav — hidden on mobile */}
+      <nav className="hidden sm:block fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
         <div className="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = location.pathname === path;
@@ -145,6 +133,115 @@ export default function Layout() {
           })}
         </div>
       </nav>
+
+      {/* Mobile Floating Nav — visible only on mobile */}
+      <div className="sm:hidden">
+        {/* Backdrop */}
+        <AnimatePresence>
+          {navOpen && (
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-40"
+              onClick={() => setNavOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Popup nav card */}
+        <AnimatePresence>
+          {navOpen && (
+            <motion.div
+              key="navcard"
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 16 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+              className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-2xl p-3 w-72"
+            >
+              <div className="grid grid-cols-4 gap-1">
+                {navItems.map(({ path, icon: Icon, label }) => {
+                  const isActive = location.pathname === path;
+                  const showBadge = path === "/quests" && unclaimedQuests > 0;
+                  return (
+                    <button
+                      key={path}
+                      onClick={() => { navigate(path); setNavOpen(false); }}
+                      className={`relative flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl transition-all duration-150 ${
+                        isActive
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground active:bg-muted"
+                      }`}
+                    >
+                      <div className="relative">
+                        <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />
+                        {showBadge && (
+                          <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-destructive text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                            {unclaimedQuests}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[9px] font-semibold leading-none">{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating pill toggle button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setNavOpen(o => !o)}
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-4 py-2.5 shadow-lg shadow-primary/30"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {navOpen ? (
+              <motion.span
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center"
+              >
+                <X className="w-5 h-5" />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="icon"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2"
+              >
+                {(() => {
+                  const active = navItems.find(n => n.path === location.pathname) || navItems[0];
+                  const ActiveIcon = active.icon;
+                  return (
+                    <>
+                      <div className="relative">
+                        <ActiveIcon className="w-5 h-5 stroke-[2.5]" />
+                        {location.pathname === "/quests" && unclaimedQuests > 0 && (
+                          <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-destructive text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                            {unclaimedQuests}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-bold font-heading">{active.label}</span>
+                    </>
+                  );
+                })()}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </div>
     </div>
   );
 }

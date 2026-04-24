@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -18,10 +19,24 @@ import OurTeam from './pages/OurTeam';
 import ContactUs from './pages/ContactUs';
 import ProUpgrade from './pages/ProUpgrade';
 import SignIn from './pages/SignIn';
+import Landing from './pages/Landing';
 import Admin from './pages/Admin';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-import Quests from './pages/Quests';
+import Quests from './pages/Quests'
+import Messages from './pages/Messages';
+
+function GAPageTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "page_view", {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location]);
+  return null;
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated } = useAuth();
@@ -34,12 +49,17 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Not signed in — show sign-in page for every route
+  // Not signed in — landing page at /, sign-in everywhere else
   if (!isAuthenticated) {
     return (
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/glossary" element={<Glossary />} />
+        <Route path="/our-team" element={<OurTeam />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/upgrade" element={<ProUpgrade />} />
         <Route path="*" element={<SignIn />} />
       </Routes>
     );
@@ -61,6 +81,7 @@ const AuthenticatedApp = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/upgrade" element={<ProUpgrade />} />
         <Route path="/quests" element={<Quests />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
@@ -75,6 +96,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <GAPageTracker />
           <AuthenticatedApp />
         </Router>
         <Toaster />

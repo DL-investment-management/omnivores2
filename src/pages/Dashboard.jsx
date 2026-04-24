@@ -5,14 +5,53 @@ import StreakBadge from "../components/StreakBadge";
 import StreakCelebration from "../components/StreakCelebration";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUserProgress, subscribeToUnlockedAuthors, unlockAuthorReward, isProUser, isUnitFree, needsOnboarding, markOnboardingDone } from "@/lib/appData";
+import { checkInStreak, getCurrentUser, getLessons, getUnlockedAuthorIds, getUserProgress, subscribeToUnlockedAuthors, unlockAuthorReward, needsOnboarding, markOnboardingDone } from "@/lib/appData";
 import { triggerLoginQuest, triggerStreakQuest } from "@/lib/quests";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
+import LevelUpCelebration from "@/components/LevelUpCelebration";
 import { AnimatePresence } from "framer-motion";
 import { getLevelInfo } from "@/lib/progression";
 import { getAuthorRewardForUnit } from "@/lib/authorRewards";
 import UnitAuthorNode from "@/components/UnitAuthorNode";
-import { Crown } from "lucide-react";
+
+const LAST_KNOWN_LEVEL_KEY = "econogo_last_known_level";
+const LAST_KNOWN_XP_KEY = "econogo_last_known_xp";
+
+const LEFT_TERMS = [
+  "Supply","Demand","Price","Market","Trade","Labor","Capital","Rent",
+  "Profit","Loss","Revenue","Cost","Value","Tax","Debt","Bond",
+  "Stock","Asset","Risk","Credit","Money","Export","Import","Tariff",
+  "Surplus","Shortage","Utility","Equity","Budget","Deficit",
+];
+const RIGHT_TERMS = [
+  "GDP","GNP","CPI","Inflation","Deflation","Recession","Growth","Interest",
+  "Currency","Exchange","Reserve","Fiscal","Monetary","Banking","Loan","Mortgage",
+  "Insurance","Return","Index","Dividend","Option","Hedge","Portfolio","Yield",
+  "Margin","Subsidy","Quota","Wage","Savings","Investment",
+];
+const BUBBLE_COLORS = [
+  "bg-primary/10 text-primary border-primary/25",
+  "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25",
+  "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/25",
+  "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
+  "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+  "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
+  "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/25",
+];
+
+function getDayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now - start) / 86400000);
+}
+
+function getWordOfTheDay(lessons) {
+  const allTerms = lessons.flatMap((l) =>
+    (l.vocabulary || []).map((v) => ({ ...v, lessonTitle: l.title, unit: l.unit, lessonIcon: l.icon }))
+  );
+  if (allTerms.length === 0) return null;
+  return allTerms[getDayOfYear() % allTerms.length];
+}
 
 function PathConnector({ fromLeft, toLeft }) {
   const startX = fromLeft ? 32 : 288;
@@ -43,16 +82,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [unlockedAuthors, setUnlockedAuthors] = useState([]);
-  const [isPro, setIsPro] = useState(isProUser());
-
-  useEffect(() => {
-    const handler = (e) => setIsPro(e.detail);
-    window.addEventListener("econogo:pro-updated", handler);
-    return () => window.removeEventListener("econogo:pro-updated", handler);
-  }, []);
   const [showStreakPreview, setShowStreakPreview] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [pendingStreakGrew, setPendingStreakGrew] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpXp, setLevelUpXp] = useState(0);
+  const [prevXpSnapshot, setPrevXpSnapshot] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -66,6 +101,20 @@ export default function Dashboard() {
         setLessons(l);
         setProgress(p);
         setUnlockedAuthors(getUnlockedAuthorIds());
+
+        // Level-up detection
+        const currentXp = u.xp || 0;
+        const currentLevel = getLevelInfo(currentXp).level;
+        const storedLevel = parseInt(localStorage.getItem(LAST_KNOWN_LEVEL_KEY) || "1", 10);
+        const storedXp = parseInt(localStorage.getItem(LAST_KNOWN_XP_KEY) || "0", 10);
+        if (currentLevel > storedLevel) {
+          setPrevXpSnapshot(storedXp);
+          setLevelUpXp(currentXp);
+          // Delay so it doesn't fight the onboarding / streak modal
+          setTimeout(() => setShowLevelUp(true), 1200);
+        }
+        localStorage.setItem(LAST_KNOWN_LEVEL_KEY, String(currentLevel));
+        localStorage.setItem(LAST_KNOWN_XP_KEY, String(currentXp));
 
         if (needsOnboarding()) {
           // Show tutorial first — hold streak animation until after
@@ -87,6 +136,14 @@ export default function Dashboard() {
   const handleOnboardingComplete = () => {
     markOnboardingDone();
     setShowOnboarding(false);
+    // Apply placement recommendation on first entry
+    try {
+      const placement = JSON.parse(localStorage.getItem("econogo_placement") || "null");
+      if (placement?.unit && placement.firstVisit) {
+        setSelectedUnit(placement.unit);
+        localStorage.setItem("econogo_placement", JSON.stringify({ ...placement, firstVisit: false }));
+      }
+    } catch {}
     if (pendingStreakGrew) {
       setTimeout(() => setShowStreakPreview(true), 600);
     }
@@ -208,6 +265,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <StreakCelebration streak={user?.streak || 0} show={showStreakPreview} onDismiss={() => setShowStreakPreview(false)} />
+      <LevelUpCelebration show={showLevelUp} xp={levelUpXp} prevXp={prevXpSnapshot} onDismiss={() => setShowLevelUp(false)} />
 
         {/* Mobile Unit Selector */}
         <div className="md:hidden flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
@@ -259,40 +317,71 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+        {/* Word of the Day */}
+        {(() => {
+          const wotd = getWordOfTheDay(lessons);
+          if (!wotd) return null;
+          return (
+            <motion.div
+              className="mb-8 rounded-2xl overflow-hidden border border-border"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2 flex items-center justify-between border-b border-border">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">📖</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-primary">Word of the Day</span>
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground">{wotd.lessonIcon} {wotd.lessonTitle}</span>
+              </div>
+              <div className="bg-card px-4 py-4">
+                <p className="font-heading font-black text-lg text-foreground mb-1">{wotd.term}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{wotd.definition}</p>
+              </div>
+            </motion.div>
+          );
+        })()}
+
         {/* Learning Path */}
-        {Object.entries(filteredUnits).map(([unitName, unitLessons]) => {
-        const unitLocked = !isUnitFree(unitName) && !isPro;
-        return (
+        <div className="relative">
+          {/* Left term bubbles — desktop only, sprinkled down the path */}
+          {LEFT_TERMS.map((term, i) => (
+            <motion.div
+              key={`lt-${term}`}
+              className={`absolute hidden md:flex items-center justify-center w-11 h-11 rounded-full border-2 text-[8px] font-black text-center leading-tight pointer-events-none select-none z-10 ${BUBBLE_COLORS[i % BUBBLE_COLORS.length]}`}
+              style={{ top: `${i * 118 + 60}px`, left: "calc(50% - 215px)" }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.4 + i * 0.04 }}
+            >
+              <span className="px-1 break-words max-w-[38px] text-center">{term}</span>
+            </motion.div>
+          ))}
+
+          {/* Right term bubbles — offset by half a step so they stagger with left ones */}
+          {RIGHT_TERMS.map((term, i) => (
+            <motion.div
+              key={`rt-${term}`}
+              className={`absolute hidden md:flex items-center justify-center w-11 h-11 rounded-full border-2 text-[8px] font-black text-center leading-tight pointer-events-none select-none z-10 ${BUBBLE_COLORS[(i + 3) % BUBBLE_COLORS.length]}`}
+              style={{ top: `${i * 118 + 119}px`, right: "calc(50% - 215px)" }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.4 + i * 0.04 }}
+            >
+              <span className="px-1 break-words max-w-[38px] text-center">{term}</span>
+            </motion.div>
+          ))}
+
+        {Object.entries(filteredUnits).map(([unitName, unitLessons]) => (
         <div key={unitName} className="mb-10">
           <motion.div
             className="text-center mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <h2 className="text-base font-heading font-bold text-foreground inline-flex items-center gap-2">
-              {unitName}
-              {unitLocked && (
-                <span className="inline-flex items-center gap-1 bg-yellow-500/15 text-yellow-600 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
-                  <Crown className="w-3 h-3" /> Pro
-                </span>
-              )}
-            </h2>
+            <h2 className="text-base font-heading font-bold text-foreground">{unitName}</h2>
           </motion.div>
-
-          {unitLocked ? (
-            <div className="flex w-full max-w-[320px] flex-col mx-auto items-center">
-              <button
-                onClick={() => navigate("/upgrade")}
-                className="w-full bg-card/60 border border-border rounded-2xl p-8 flex flex-col items-center gap-3 opacity-70 hover:opacity-100 transition-all"
-              >
-                <div className="w-14 h-14 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                  <Crown className="w-7 h-7 text-yellow-500" />
-                </div>
-                <p className="text-sm font-heading font-bold text-foreground">Unlock with Pro</p>
-                <p className="text-xs text-muted-foreground">{unitLessons.length} lesson{unitLessons.length > 1 ? 's' : ''} · Tap to upgrade</p>
-              </button>
-            </div>
-          ) : (
 
           <div className="flex w-full max-w-[320px] flex-col mx-auto">
             {(() => {
@@ -354,9 +443,9 @@ export default function Dashboard() {
               });
             })()}
           </div>
-          )}
         </div>
-      )})}
+        ))}
+        </div>{/* end relative path wrapper */}
 
         {lessons.length === 0 && (
         <div className="text-center py-20">

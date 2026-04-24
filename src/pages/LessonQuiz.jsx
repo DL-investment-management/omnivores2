@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { X, Heart, Zap } from "lucide-react";
+import { X, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import QuizMultipleChoice from "../components/QuizMultipleChoice";
@@ -18,13 +18,6 @@ import {
   getQuestionsByLessonId,
   saveUserProgress,
   updateCurrentUser,
-  isProUser,
-  isUnitFree,
-  getEnergy,
-  spendEnergy,
-  msUntilEnergy,
-  ENERGY_COST_PER_QUESTION,
-  MAX_ENERGY,
 } from "@/lib/appData";
 import { getLevelInfo, getNewlyUnlockedCosmetics } from "@/lib/progression";
 import { triggerLessonQuest } from "@/lib/quests";
@@ -44,8 +37,6 @@ export default function LessonQuiz() {
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [newStreak, setNewStreak] = useState(0);
   const [showOverview, setShowOverview] = useState(true);
-  const [energy, setEnergy] = useState(() => getEnergy());
-  const [outOfEnergy, setOutOfEnergy] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -54,11 +45,6 @@ export default function LessonQuiz() {
           getLessonById(id),
           getQuestionsByLessonId(id),
         ]);
-        // Freemium gate: redirect if Pro-only lesson
-        if (loadedLesson && !isUnitFree(loadedLesson.unit) && !isProUser()) {
-          navigate("/upgrade", { replace: true });
-          return;
-        }
         setLesson(loadedLesson);
         setQuestions(qs);
       } catch (e) {
@@ -71,11 +57,6 @@ export default function LessonQuiz() {
   }, [id]);
 
   const handleAnswer = async (isCorrect) => {
-    // Deduct energy for this answer
-    spendEnergy(ENERGY_COST_PER_QUESTION);
-    const remaining = getEnergy();
-    setEnergy(remaining);
-
     if (isCorrect) {
       setCorrectCount((c) => c + 1);
     } else {
@@ -87,9 +68,6 @@ export default function LessonQuiz() {
 
     if (isLastQuestion || outOfLives) {
       await completeLesson(isCorrect ? correctCount + 1 : correctCount);
-    } else if (remaining < ENERGY_COST_PER_QUESTION) {
-      // Out of energy — can't continue
-      setOutOfEnergy(true);
     } else {
       setTimeout(() => setCurrentIndex((i) => i + 1), 200);
     }
@@ -295,9 +273,6 @@ export default function LessonQuiz() {
                 {(lesson.capital_reward || 0) > 0 && <span className="font-semibold text-secondary">+{lesson.capital_reward} Capital</span>}
                 <span>{questions.length} question{questions.length !== 1 ? "s" : ""}</span>
                 <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-destructive fill-destructive" /> 3 lives</span>
-                <span className="flex items-center gap-1 text-yellow-500 font-semibold">
-                  <Zap className="w-3.5 h-3.5 fill-yellow-500" /> {energy}/{MAX_ENERGY}
-                </span>
               </div>
 
               <Button
@@ -311,36 +286,6 @@ export default function LessonQuiz() {
         )}
       </AnimatePresence>
 
-      {/* Out of energy overlay */}
-      {outOfEnergy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <motion.div
-            className="bg-card rounded-2xl border border-border w-full max-w-sm p-6 text-center"
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
-            <div className="w-16 h-16 rounded-full bg-yellow-500/15 flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-yellow-500" />
-            </div>
-            <h2 className="text-xl font-heading font-black mb-1">Out of Energy</h2>
-            <p className="text-sm text-muted-foreground mb-1">
-              Your energy regens over 72 hours.
-            </p>
-            <p className="text-xs text-muted-foreground mb-6">
-              Come back in ~{(() => {
-                const ms = msUntilEnergy(ENERGY_COST_PER_QUESTION);
-                const h = Math.floor(ms / 3600000);
-                const m = Math.floor((ms % 3600000) / 60000);
-                return h > 0 ? `${h}h ${m}m` : `${m}m`;
-              })()}
-            </p>
-            <Button onClick={() => navigate("/")} className="w-full rounded-xl font-heading font-bold">
-              Back to Dashboard
-            </Button>
-          </motion.div>
-        </div>
-      )}
-
       {/* Top Bar */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
@@ -348,10 +293,6 @@ export default function LessonQuiz() {
         </button>
         <Progress value={progressPercent} className="flex-1 h-3 rounded-full" />
         <div className="flex items-center gap-1.5">
-          <span className="flex items-center gap-0.5 text-xs font-bold text-yellow-500">
-            <Zap className="w-3.5 h-3.5 fill-yellow-500" />{energy}
-          </span>
-          <span className="text-muted-foreground/30">|</span>
           {Array.from({ length: 3 }).map((_, i) => (
             <Heart
               key={i}

@@ -6,17 +6,17 @@ export default function PrivacyPolicy() {
 
       <section className="mb-6">
         <h2 className="font-bold text-base mb-2">1. Information We Collect</h2>
-        <p className="text-muted-foreground leading-relaxed">When you sign in with Google, we receive your email address and display name. We store this to track your learning progress, XP, streaks, and subscription status. We do not collect payment details — all payments are handled by Lemon Squeezy.</p>
+        <p className="text-muted-foreground leading-relaxed">When you sign in with Google, we receive your email address and display name. We store this to track your learning progress, XP, and streaks. Econ-Go is free — we do not collect payment details.</p>
       </section>
 
       <section className="mb-6">
         <h2 className="font-bold text-base mb-2">2. How We Use Your Information</h2>
-        <p className="text-muted-foreground leading-relaxed">Your email is used to identify your account, sync your Pro subscription status, and save your progress across devices. We do not sell, rent, or share your personal information with third parties for marketing purposes.</p>
+        <p className="text-muted-foreground leading-relaxed">Your email is used to identify your account and save your progress across devices. We do not sell, rent, or share your personal information with third parties for marketing purposes.</p>
       </section>
 
       <section className="mb-6">
         <h2 className="font-bold text-base mb-2">3. Data Storage</h2>
-        <p className="text-muted-foreground leading-relaxed">Your account data (email, Pro status) is stored securely in Supabase. Your learning progress, XP, and preferences are stored locally in your browser. We use Google OAuth for authentication — we never see or store your Google password.</p>
+        <p className="text-muted-foreground leading-relaxed">Your account data (email, XP, streak, avatar) is stored securely in Supabase. Your learning progress and preferences are stored locally in your browser. We use Google OAuth for authentication — we never see or store your Google password.</p>
       </section>
 
       <section className="mb-6">

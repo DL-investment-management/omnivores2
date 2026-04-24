@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: false, // we have our own public/manifest.json
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: '/Index.html',
         navigateFallbackDenylist: [/^\/api\//],
       },
     }),

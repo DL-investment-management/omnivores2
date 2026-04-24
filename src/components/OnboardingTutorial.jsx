@@ -1,13 +1,12 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Crown, Trophy, BookMarked, Library, ShoppingBag,
+  Trophy, BookMarked, Library, ShoppingBag,
   ChevronRight, ChevronLeft, X, Pencil,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { updateCurrentUser } from "@/lib/appData";
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 9;
 
 /* ─────────────────────────────────────────────────────────
    BEAR MASCOT with animated arms
@@ -350,7 +349,7 @@ function StepLearn() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        Free users start with <span className="text-white font-bold">Supply &amp; Demand</span>
+        Everything is <span className="text-white font-bold">100% free</span> — all 7 units included
       </motion.p>
     </div>
   );
@@ -534,7 +533,7 @@ function StepCapital() {
       >
         <p className="text-white text-xs font-black mb-1">🛍️ What can Capital buy?</p>
         <p className="text-white/65 text-xs leading-relaxed">
-          Unlock the <strong className="text-white">Shop</strong> with Pro and spend Capital on custom avatars,
+          Head to the <strong className="text-white">Shop</strong> and spend Capital on custom avatars,
           cosmetic upgrades, and exclusive items — all earned by actually learning.
         </p>
       </motion.div>
@@ -543,13 +542,13 @@ function StepCapital() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   STEP 4 — PRO FEATURES
+   STEP 4 — EXPLORE THE APP
 ───────────────────────────────────────────────────────── */
-const LOCKED_TABS = [
-  { icon: Trophy, label: "Rank", color: "text-yellow-300", bg: "bg-yellow-400/20", desc: "Compete on the global leaderboard in real time." },
-  { icon: BookMarked, label: "Glossary", color: "text-blue-300", bg: "bg-blue-400/20", desc: "Full economics dictionary — every term defined." },
-  { icon: Library, label: "Good Reads", color: "text-green-300", bg: "bg-green-400/20", desc: "Curated books and author profiles by economists." },
-  { icon: ShoppingBag, label: "Shop", color: "text-pink-300", bg: "bg-pink-400/20", desc: "Spend Capital on avatars and exclusive cosmetics." },
+const APP_FEATURES = [
+  { icon: Trophy,      label: "Leaderboard", color: "text-yellow-300", bg: "bg-yellow-400/20", desc: "Compete with learners globally — see how you rank." },
+  { icon: BookMarked,  label: "Glossary",    color: "text-blue-300",   bg: "bg-blue-400/20",   desc: "Every economics term, defined clearly." },
+  { icon: Library,     label: "Good Reads",  color: "text-green-300",  bg: "bg-green-400/20",  desc: "Curated books and articles by top economists." },
+  { icon: ShoppingBag, label: "Shop",        color: "text-pink-300",   bg: "bg-pink-400/20",   desc: "Spend Capital on avatars & cosmetic upgrades." },
 ];
 
 function StepPro() {
@@ -561,37 +560,31 @@ function StepPro() {
         transition={{ delay: 0.05 }}
         className="text-center"
       >
-        <h2 className="text-2xl font-heading font-black text-white">Unlock with Pro</h2>
-        <p className="text-white/58 text-xs mt-1 max-w-[260px] mx-auto">
-          4 tabs are locked for free users — here's exactly what each one gives you:
+        <span className="inline-block bg-white/20 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
+          All Free
+        </span>
+        <h2 className="text-2xl font-heading font-black text-white">Explore the app</h2>
+        <p className="text-white/60 text-xs mt-1 max-w-[260px] mx-auto">
+          Beyond lessons, there's a whole app to discover — <strong className="text-white">all 100% free</strong>:
         </p>
       </motion.div>
 
-      {/* Bear pointing at the grid */}
       <motion.div
         initial={{ scale: 0, y: 10 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", damping: 14, delay: 0.15 }}
-        className="relative"
       >
         <BearMascot pose="point-grid" size={80} />
-        <motion.div
-          className="absolute -top-3 -right-1"
-          animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <Crown className="w-6 h-6 text-yellow-300 drop-shadow-lg" />
-        </motion.div>
       </motion.div>
 
-      {/* Locked tab cards */}
+      {/* Feature cards */}
       <motion.div
         className="grid grid-cols-2 gap-2 w-full max-w-sm"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        {LOCKED_TABS.map(({ icon: Icon, label, color, bg, desc }, i) => (
+        {APP_FEATURES.map(({ icon: Icon, label, color, bg, desc }, i) => (
           <motion.div
             key={label}
             className={`${bg} border border-white/18 rounded-2xl p-3 text-left flex flex-col gap-1.5`}
@@ -608,45 +601,123 @@ function StepPro() {
         ))}
       </motion.div>
 
-      {/* Also includes */}
+      <motion.div
+        className="bg-white/12 border border-white/18 rounded-2xl p-3 w-full max-w-sm text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.65 }}
+      >
+        <p className="text-white text-sm font-black mb-1">🎉 No paywalls, ever</p>
+        <p className="text-white/55 text-[10px] leading-snug">
+          All 7 units, all lessons, glossary, leaderboard, shop, quests — zero limits. Enjoy!
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP 5 — QUESTS
+───────────────────────────────────────────────────────── */
+const MOCK_DAILY = [
+  { icon: "📅", label: "Show Up",   xp: 5,  done: true  },
+  { icon: "📚", label: "Scholar",   xp: 15, done: false },
+  { icon: "🔥", label: "On Fire",   xp: 5,  done: false },
+];
+const MOCK_SPECIAL = [
+  { icon: "🌱", label: "First Step",    xp: 10,  progress: 1, max: 1,  done: true  },
+  { icon: "📖", label: "Bookworm",      xp: 75,  progress: 0, max: 1,  done: false },
+  { icon: "🎩", label: "Hat Collector", xp: 30,  progress: 0, max: 1,  done: false },
+];
+
+function StepQuests() {
+  return (
+    <div className="flex flex-col items-center gap-3 px-5 w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="text-center"
+      >
+        <h2 className="text-2xl font-heading font-black text-white">Quests &amp; Rewards</h2>
+        <p className="text-white/60 text-xs mt-1 max-w-[260px] mx-auto">
+          Complete daily tasks and hit special milestones to earn bonus XP.
+        </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ scale: 0, y: 10 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: "spring", damping: 14, delay: 0.15 }}
+      >
+        <BearMascot pose="cheer" size={72} />
+      </motion.div>
+
+      <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
+        {/* Daily column */}
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/45 mb-1.5 text-center">Daily</p>
+          <div className="flex flex-col gap-1.5">
+            {MOCK_DAILY.map(({ icon, label, xp, done }, i) => (
+              <motion.div
+                key={label}
+                className={`flex items-center gap-2 rounded-xl px-2.5 py-2 ${done ? "bg-green-400/25 border border-green-300/30" : "bg-white/12 border border-white/15"}`}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.08, type: "spring", stiffness: 220 }}
+              >
+                <span className="text-base leading-none">{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-[10px] font-black leading-tight truncate">{label}</p>
+                  <p className="text-white/45 text-[9px] font-bold">+{xp} XP</p>
+                </div>
+                {done && <span className="text-green-300 text-xs font-black">✓</span>}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Special column */}
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/45 mb-1.5 text-center">Special</p>
+          <div className="flex flex-col gap-1.5">
+            {MOCK_SPECIAL.map(({ icon, label, xp, progress, max, done }, i) => (
+              <motion.div
+                key={label}
+                className={`flex flex-col gap-1 rounded-xl px-2.5 py-2 ${done ? "bg-green-400/25 border border-green-300/30" : "bg-white/12 border border-white/15"}`}
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.08, type: "spring", stiffness: 220 }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base leading-none">{icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-[10px] font-black leading-tight truncate">{label}</p>
+                    <p className="text-white/45 text-[9px] font-bold">+{xp} XP</p>
+                  </div>
+                  {done && <span className="text-green-300 text-xs font-black">✓</span>}
+                </div>
+                {!done && (
+                  <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white/70 rounded-full" style={{ width: `${(progress / max) * 100}%` }} />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <motion.div
         className="bg-white/12 border border-white/18 rounded-2xl p-3 w-full max-w-sm"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.65 }}
       >
-        <p className="text-white/85 text-[10px] font-black uppercase tracking-widest mb-1.5">Also included:</p>
+        <p className="text-white/85 text-[10px] font-black uppercase tracking-widest mb-1.5">How it works</p>
         <div className="flex flex-col gap-1">
-          <p className="text-white/62 text-[10px] leading-snug">
-            🤖 <strong className="text-white">AI-graded questions</strong> — real feedback on typed answers
-          </p>
-          <p className="text-white/62 text-[10px] leading-snug">
-            📚 <strong className="text-white">All 7 units</strong> — 16 full lessons across economics
-          </p>
-          <p className="text-white/62 text-[10px] leading-snug">
-            🎨 <strong className="text-white">Exclusive cosmetics</strong> — stand out on the leaderboard
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Pricing */}
-      <motion.div
-        className="flex items-stretch gap-2 w-full max-w-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-      >
-        <div className="flex-1 bg-white/15 rounded-xl p-2.5 text-center">
-          <p className="text-white font-black text-xl leading-none">$3.99</p>
-          <p className="text-white/50 text-[10px] mt-0.5">per month</p>
-        </div>
-        <div className="flex items-center text-white/35 text-xs font-bold px-1">or</div>
-        <div className="flex-1 bg-yellow-400/22 border border-yellow-300/35 rounded-xl p-2.5 text-center relative overflow-hidden">
-          <div className="absolute -top-px left-1/2 -translate-x-1/2 bg-green-400 text-white text-[8px] font-black px-2 py-0.5 rounded-b-full">
-            SAVE 58%
-          </div>
-          <p className="text-white font-black text-xl leading-none mt-2">$19.99</p>
-          <p className="text-white/50 text-[10px] mt-0.5">per year</p>
+          <p className="text-white/62 text-[10px] leading-snug">📅 <strong className="text-white">Daily quests</strong> reset every midnight — log in, complete lessons, check the leaderboard</p>
+          <p className="text-white/62 text-[10px] leading-snug">🏆 <strong className="text-white">Special quests</strong> are permanent milestones — unlock authors, build streaks, deck out your wardrobe</p>
         </div>
       </motion.div>
     </div>
@@ -654,7 +725,7 @@ function StepPro() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   STEP 5 — PICK YOUR NAME
+   STEP 6 — PICK YOUR NAME
 ───────────────────────────────────────────────────────── */
 function StepName({ value, onChange }) {
   return (
@@ -740,7 +811,276 @@ function StepName({ value, onChange }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   STEP 6 — READY!
+   STEP 7 — DIAGNOSTIC (placement quiz)
+───────────────────────────────────────────────────────── */
+const DIAGNOSTIC_QUESTIONS = [
+  {
+    unit: "Supply & Demand", emoji: "📈",
+    question: "If demand for a product increases while supply stays the same, what happens to the price?",
+    options: ["The price falls", "The price rises", "Nothing changes", "Supply automatically increases"],
+    correct: 1,
+  },
+  {
+    unit: "Intro to Micro", emoji: "🧠",
+    question: "What is 'opportunity cost'?",
+    options: ["The cost of raw materials", "A government tax on production", "The value of the best alternative you give up", "The price of borrowing money"],
+    correct: 2,
+  },
+  {
+    unit: "Inflation", emoji: "💸",
+    question: "What best describes inflation?",
+    options: ["A rise in unemployment", "A general increase in the price level over time", "A decrease in government spending", "When the stock market crashes"],
+    correct: 1,
+  },
+  {
+    unit: "Game Theory", emoji: "♟️",
+    question: "In the Prisoner's Dilemma, both suspects tend to confess rather than cooperate because...",
+    options: ["They trust each other completely", "The police force them", "Each acts in self-interest regardless of the other", "Silence is not an option"],
+    correct: 2,
+  },
+  {
+    unit: "History of Economics", emoji: "📜",
+    question: "Who wrote 'The Wealth of Nations' (1776)?",
+    options: ["John Maynard Keynes", "Karl Marx", "Milton Friedman", "Adam Smith"],
+    correct: 3,
+  },
+  {
+    unit: "Macro 101", emoji: "🌐",
+    question: "What does GDP measure?",
+    options: ["A country's total debt", "The value of all goods & services produced in a country", "Average household income", "Government tax revenue"],
+    correct: 1,
+  },
+  {
+    unit: "Behavioral Economics", emoji: "🔮",
+    question: "What is a 'nudge' in behavioral economics?",
+    options: ["A fine for making bad choices", "A mandatory government policy", "A subtle design that steers people toward better decisions", "A type of market tax"],
+    correct: 2,
+  },
+];
+
+function StepDiagnostic({ onComplete }) {
+  const [phase, setPhase] = useState("intro"); // "intro" | "quiz" | "results"
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+  const [results, setResults] = useState([]);
+
+  const totalQ = DIAGNOSTIC_QUESTIONS.length;
+  const q = DIAGNOSTIC_QUESTIONS[currentQ];
+
+  const getRecommendation = (res) => {
+    const firstFail = res.findIndex((r) => !r);
+    return firstFail === -1
+      ? DIAGNOSTIC_QUESTIONS[totalQ - 1].unit
+      : DIAGNOSTIC_QUESTIONS[firstFail].unit;
+  };
+
+  const handleSelect = (idx) => {
+    if (revealed) return;
+    setSelectedIdx(idx);
+    setRevealed(true);
+    const correct = idx === q.correct;
+    const newResults = [...results, correct];
+    setResults(newResults);
+
+    setTimeout(() => {
+      if (currentQ < totalQ - 1) {
+        setCurrentQ((c) => c + 1);
+        setSelectedIdx(null);
+        setRevealed(false);
+      } else {
+        const rec = getRecommendation(newResults);
+        try {
+          localStorage.setItem("econogo_placement", JSON.stringify({
+            unit: rec,
+            score: newResults.filter(Boolean).length,
+            total: totalQ,
+            firstVisit: true,
+            date: new Date().toISOString(),
+          }));
+        } catch {}
+        setPhase("results");
+      }
+    }, 1300);
+  };
+
+  /* ── Intro ── */
+  if (phase === "intro") {
+    return (
+      <div className="flex flex-col items-center gap-4 px-5 w-full text-center">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <h2 className="text-2xl font-heading font-black text-white">Placement Quiz</h2>
+          <p className="text-white/60 text-xs mt-1 max-w-[260px] mx-auto">
+            7 quick questions — one per unit. We'll find the best place for you to start.
+          </p>
+        </motion.div>
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 14, delay: 0.15 }}>
+          <BearMascot pose="point-both-down" size={80} />
+        </motion.div>
+        <div className="flex flex-col gap-1.5 w-full max-w-xs">
+          {DIAGNOSTIC_QUESTIONS.map(({ unit, emoji }, i) => (
+            <motion.div
+              key={unit}
+              className="flex items-center gap-2 bg-white/12 rounded-xl px-3 py-2"
+              initial={{ opacity: 0, x: -14 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + i * 0.06, type: "spring" }}
+            >
+              <span className="text-sm">{emoji}</span>
+              <span className="text-white text-xs font-semibold">{unit}</span>
+            </motion.div>
+          ))}
+        </div>
+        <motion.button
+          onClick={() => setPhase("quiz")}
+          className="bg-white text-orange-500 font-black px-8 py-3 rounded-2xl text-sm hover:bg-white/92 active:scale-95 transition-all shadow-lg mt-1"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          Start Quiz →
+        </motion.button>
+      </div>
+    );
+  }
+
+  /* ── Quiz ── */
+  if (phase === "quiz") {
+    return (
+      <div className="flex flex-col items-center gap-4 px-5 w-full">
+        {/* Progress bar */}
+        <div className="w-full max-w-sm">
+          <div className="flex justify-between text-[9px] font-bold text-white/50 mb-1.5">
+            <span>{q.unit}</span>
+            <span>{currentQ + 1} / {totalQ}</span>
+          </div>
+          <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-white rounded-full"
+              animate={{ width: `${(currentQ / totalQ) * 100}%` }}
+              transition={{ duration: 0.4 }}
+            />
+          </div>
+        </div>
+
+        {/* Question card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQ}
+            className="w-full max-w-sm"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.22 }}
+          >
+            <div className="text-center mb-3">
+              <span className="text-4xl">{q.emoji}</span>
+              <p className="text-white font-black text-sm mt-2 leading-snug">{q.question}</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {q.options.map((option, idx) => {
+                let cls = "bg-white/15 border-white/20 text-white hover:bg-white/25";
+                if (revealed) {
+                  if (idx === q.correct) cls = "bg-green-400/35 border-green-300/60 text-white";
+                  else if (idx === selectedIdx) cls = "bg-red-400/30 border-red-300/50 text-white/70";
+                  else cls = "bg-white/8 border-white/10 text-white/35";
+                }
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelect(idx)}
+                    disabled={revealed}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-all ${cls}`}
+                  >
+                    <span className="font-black mr-2 opacity-60">{["A","B","C","D"][idx]}.</span>
+                    {option}
+                    {revealed && idx === q.correct && <span className="ml-1.5 text-green-300">✓</span>}
+                    {revealed && idx === selectedIdx && idx !== q.correct && <span className="ml-1.5 text-red-300">✗</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  /* ── Results ── */
+  const recommendation = getRecommendation(results);
+  const correctCount = results.filter(Boolean).length;
+  const allCorrect = correctCount === totalQ;
+
+  return (
+    <div className="flex flex-col items-center gap-3 px-5 w-full">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+        <h2 className="text-2xl font-heading font-black text-white">
+          {allCorrect ? "You're an expert! 🎓" : correctCount >= 5 ? "Strong knowledge! 📊" : correctCount >= 3 ? "Good foundation! 🌱" : "Let's start fresh! 👋"}
+        </h2>
+        <p className="text-white/55 text-xs mt-1">{correctCount}/{totalQ} correct</p>
+      </motion.div>
+
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 14, delay: 0.1 }}>
+        <BearMascot pose={allCorrect ? "victory" : correctCount >= 4 ? "cheer" : "wave"} size={72} />
+      </motion.div>
+
+      {/* Per-unit results */}
+      <div className="w-full max-w-sm flex flex-col gap-1.5">
+        {DIAGNOSTIC_QUESTIONS.map(({ unit, emoji }, i) => (
+          <motion.div
+            key={unit}
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2 border ${results[i] ? "bg-green-400/18 border-green-300/30" : "bg-red-400/12 border-red-300/20"}`}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.06, type: "spring" }}
+          >
+            <span className="text-sm">{emoji}</span>
+            <span className="flex-1 text-white text-xs font-semibold">{unit}</span>
+            <span className={`text-sm font-black ${results[i] ? "text-green-300" : "text-red-300"}`}>
+              {results[i] ? "✓" : "✗"}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Recommendation box */}
+      <motion.div
+        className="bg-white/15 border border-white/25 rounded-2xl p-3 w-full max-w-sm"
+        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+      >
+        <p className="text-white/65 text-[9px] font-black uppercase tracking-widest mb-1">Recommended Starting Point</p>
+        <p className="text-white font-black text-sm">📍 {recommendation}</p>
+        <p className="text-white/50 text-[10px] mt-0.5 leading-snug">
+          {allCorrect
+            ? "You aced it — we'll still walk you through everything to reinforce the concepts."
+            : "We'll navigate you straight there when you enter the app."}
+        </p>
+      </motion.div>
+
+      <motion.div
+        className="flex flex-col gap-2 w-full max-w-sm"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+      >
+        <motion.button
+          onClick={() => onComplete(recommendation)}
+          className="w-full bg-white text-orange-500 font-black px-6 py-3 rounded-2xl text-sm hover:bg-white/92 active:scale-95 transition-all shadow-lg"
+          whileTap={{ scale: 0.97 }}
+        >
+          📍 Start at {recommendation}
+        </motion.button>
+        <motion.button
+          onClick={() => onComplete(null)}
+          className="w-full bg-white/15 border border-white/25 text-white font-bold px-6 py-3 rounded-2xl text-sm hover:bg-white/25 active:scale-95 transition-all"
+          whileTap={{ scale: 0.97 }}
+        >
+          Start from the beginning
+        </motion.button>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP 8 — READY!
 ───────────────────────────────────────────────────────── */
 function StepReady({ confetti, name }) {
   return (
@@ -803,13 +1143,12 @@ const slideVariants = {
 /* ─────────────────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────────────────── */
-const NAME_STEP = 5;
+const NAME_STEP = 6;
 
 export default function OnboardingTutorial({ userName, onComplete }) {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [customName, setCustomName] = useState(userName?.split(" ")[0] || "");
-  const navigate = useNavigate();
   const confetti = useConfetti(26);
 
   const firstName = userName?.split(" ")[0] || "there";
@@ -821,6 +1160,17 @@ export default function OnboardingTutorial({ userName, onComplete }) {
     if (trimmed.length > 0) {
       await updateCurrentUser({ full_name: trimmed });
     }
+  };
+
+  const DIAGNOSTIC_STEP = NAME_STEP + 1; // step 7
+
+  const handleDiagComplete = (recommendation) => {
+    // null means user chose "start from beginning" — clear placement
+    if (!recommendation) {
+      try { localStorage.removeItem("econogo_placement"); } catch {}
+    }
+    setDirection(1);
+    setStep((s) => s + 1);
   };
 
   const goNext = async () => {
@@ -841,10 +1191,6 @@ export default function OnboardingTutorial({ userName, onComplete }) {
     }
   };
 
-  const handleUpgrade = () => {
-    onComplete();
-    navigate("/upgrade");
-  };
 
   const steps = [
     <StepWelcome firstName={firstName} />,
@@ -852,13 +1198,15 @@ export default function OnboardingTutorial({ userName, onComplete }) {
     <StepStreak />,
     <StepCapital />,
     <StepPro />,
+    <StepQuests />,
     <StepName value={customName} onChange={setCustomName} />,
+    <StepDiagnostic onComplete={handleDiagComplete} />,
     <StepReady confetti={confetti} name={customName.trim() || firstName} />,
   ];
 
   return (
     <motion.div
-      className="fixed inset-0 z-40 flex flex-col overflow-hidden"
+      className="fixed inset-0 z-[200] flex flex-col overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.3 } }}
@@ -884,12 +1232,14 @@ export default function OnboardingTutorial({ userName, onComplete }) {
         <div className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
           {step + 1} of {TOTAL_STEPS}
         </div>
-        <button
-          onClick={onComplete}
-          className="flex items-center gap-1.5 text-white/50 hover:text-white/90 transition-colors text-xs font-bold py-1 px-2 rounded-lg hover:bg-white/10"
-        >
-          Skip <X className="w-3.5 h-3.5" />
-        </button>
+        {step !== DIAGNOSTIC_STEP && (
+          <button
+            onClick={onComplete}
+            className="flex items-center gap-1.5 text-white/50 hover:text-white/90 transition-colors text-xs font-bold py-1 px-2 rounded-lg hover:bg-white/10"
+          >
+            Skip <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Step content */}
@@ -928,48 +1278,35 @@ export default function OnboardingTutorial({ userName, onComplete }) {
           ))}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-2.5 w-full max-w-sm">
-          <AnimatePresence>
-            {!isFirst && (
-              <motion.button
-                key="back"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                onClick={goBack}
-                className="flex items-center gap-1 px-4 py-3.5 bg-white/20 hover:bg-white/30 active:bg-white/40 text-white font-bold rounded-2xl transition-colors text-sm"
-              >
-                <ChevronLeft className="w-4 h-4" /> Back
-              </motion.button>
-            )}
-          </AnimatePresence>
-          <motion.button
-            onClick={goNext}
-            className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 bg-white text-orange-500 font-black rounded-2xl hover:bg-white/92 active:bg-white/80 transition-colors text-sm shadow-lg shadow-orange-900/25"
-            whileTap={{ scale: 0.97 }}
-            whileHover={{ scale: 1.02 }}
-          >
-            {isLast ? "Start Learning 🚀" : step === NAME_STEP ? "Looks good →" : "Next"}
-            {!isLast && <ChevronRight className="w-4 h-4" />}
-          </motion.button>
-        </div>
-
-        {/* Pro shortcut on step 4 */}
-        <AnimatePresence>
-          {step === 4 && (
+        {/* Buttons — hidden during diagnostic (it has its own navigation) */}
+        {step !== DIAGNOSTIC_STEP && (
+          <div className="flex gap-2.5 w-full max-w-sm">
+            <AnimatePresence>
+              {!isFirst && (
+                <motion.button
+                  key="back"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  onClick={goBack}
+                  className="flex items-center gap-1 px-4 py-3.5 bg-white/20 hover:bg-white/30 active:bg-white/40 text-white font-bold rounded-2xl transition-colors text-sm"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </motion.button>
+              )}
+            </AnimatePresence>
             <motion.button
-              key="pro-cta"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              onClick={handleUpgrade}
-              className="text-yellow-200 text-xs font-bold underline underline-offset-2 hover:text-white transition-colors"
+              onClick={goNext}
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 bg-white text-orange-500 font-black rounded-2xl hover:bg-white/92 active:bg-white/80 transition-colors text-sm shadow-lg shadow-orange-900/25"
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
             >
-              Go Pro now →
+              {isLast ? "Start Learning 🚀" : step === NAME_STEP ? "Looks good →" : "Next"}
+              {!isLast && <ChevronRight className="w-4 h-4" />}
             </motion.button>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
+
       </div>
     </motion.div>
   );

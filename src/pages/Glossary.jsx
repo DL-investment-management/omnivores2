@@ -9,6 +9,16 @@ export default function Glossary() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    document.title = "Economics Glossary — Econ-Go";
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute("content", "Free economics glossary with definitions for supply & demand, microeconomics, macroeconomics, behavioral economics, personal finance, and more — from Econ-Go.");
+    return () => {
+      document.title = "Econ-Go — Learn Economics Free, One Lesson at a Time";
+      if (desc) desc.setAttribute("content", "Learn economics completely free — bite-sized lessons, daily streaks, and quizzes covering supply & demand, micro, macro, behavioral economics, personal finance, and more.");
+    };
+  }, []);
+
+  useEffect(() => {
     getLessons()
       .then((l) => {
         setLessons(l);

@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="110" fill="#f97316"/>
-  <text x="256" y="382" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="340" fill="#FFFFFF" text-anchor="middle">E</text>
+  <rect width="512" height="512" rx="110" fill="#6DC848"/>
+  <rect x="32" y="140" width="448" height="232" rx="58" fill="none" stroke="white" stroke-width="20"/>
+  <!-- sparkle -->
+  <path d="M256,186 L270,222 L306,236 L270,250 L256,286 L242,250 L206,236 L242,222 Z" fill="black"/>
+  <path d="M256,192 L268,222 L298,232 L268,242 L256,272 L244,242 L214,232 L244,222 Z" fill="#6DC848"/>
+  <text x="44" y="298" font-family="Impact,'Arial Black',sans-serif" font-weight="900" font-size="112" fill="white" font-style="italic">ECON</text>
+  <text x="272" y="298" font-family="Impact,'Arial Black',sans-serif" font-weight="900" font-size="112" fill="white" font-style="italic">-GO</text>
 </svg>

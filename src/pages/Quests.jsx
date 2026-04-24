@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Target, Check, Lock } from "lucide-react";
-import { getCurrentUser } from "@/lib/appData";
+import { getCurrentUser, getUnlockedAuthorIds, getPurchases } from "@/lib/appData";
 import {
   getDailyQuests,
   getSpecialQuests,
@@ -89,8 +89,13 @@ export default function Quests() {
   async function load() {
     const u = await getCurrentUser();
     setUser(u);
+    const ctx = {
+      streak: u?.streak || 0,
+      unlockedAuthors: getUnlockedAuthorIds(),
+      purchases: getPurchases(),
+    };
     setDailyQuests(getDailyQuests());
-    setSpecialQuests(getSpecialQuests(u?.streak || 0));
+    setSpecialQuests(getSpecialQuests(ctx));
     setLoading(false);
   }
 
@@ -108,7 +113,12 @@ export default function Quests() {
   };
 
   const handleClaimSpecial = async (id) => {
-    const ok = await claimSpecialQuest(id, user?.streak || 0);
+    const ctx = {
+      streak: user?.streak || 0,
+      unlockedAuthors: getUnlockedAuthorIds(),
+      purchases: getPurchases(),
+    };
+    const ok = await claimSpecialQuest(id, ctx);
     if (ok) load();
     return ok;
   };

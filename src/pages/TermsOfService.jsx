@@ -20,8 +20,8 @@ export default function TermsOfService() {
       </section>
 
       <section className="mb-6">
-        <h2 className="font-bold text-base mb-2">4. Pro Subscription</h2>
-        <p className="text-muted-foreground leading-relaxed">Pro subscriptions are billed monthly or annually through Lemon Squeezy. You may cancel at any time. Refunds are handled per our refund policy, which can be requested by contacting us. We reserve the right to change pricing with 30 days notice.</p>
+        <h2 className="font-bold text-base mb-2">4. Free Service</h2>
+        <p className="text-muted-foreground leading-relaxed">Econ-Go is currently provided free of charge. All lessons, units, and features are available at no cost. We reserve the right to introduce optional paid features in the future, with advance notice to users.</p>
       </section>
 
       <section className="mb-6">

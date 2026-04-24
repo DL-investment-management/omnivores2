@@ -1,5 +1,21 @@
 User-agent: *
 Allow: /
+Allow: /glossary
+Allow: /our-team
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Auth-gated — redirect to sign-in, no crawl value
 Disallow: /admin
+Disallow: /profile
+Disallow: /messages
+Disallow: /shop
+Disallow: /quests
+Disallow: /leaderboard
+Disallow: /good-reads
+Disallow: /lesson/
+Disallow: /pre-lesson/
+Disallow: /upgrade
 
 Sitemap: https://econ-go.com/sitemap.xml
