@@ -8,9 +8,9 @@ import { useCamera } from '../hooks/useCamera';
 import { analyzeFridge, getRecipes } from '../api/claude';
 import FoodOverlay from '../components/FoodOverlay';
 import RecipeSheet from '../components/RecipeSheet';
+import { saveScan, getActiveFridge, getProfile, getSettings } from '../storage/db';
 
 const { width: W, height: H } = Dimensions.get('window');
-const SCAN_INTERVAL_MS = 8000;
 
 function HudRing({ size, color, duration, delay = 0 }) {
   const spin = useRef(new Animated.Value(0)).current;
@@ -41,7 +41,7 @@ function ScanLine({ scanning }) {
   );
 }
 
-export default function ScannerScreen({ onBack }) {
+export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMealPlan }) {
   const { cameraRef, permission, requestPermission, capture } = useCamera();
   const [items, setItems] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -49,6 +49,14 @@ export default function ScannerScreen({ onBack }) {
   const [loadingRecipes, setLoadingRecipes] = useState(false);
   const [autoScan, setAutoScan] = useState(false);
   const [statusMsg, setStatusMsg] = useState('SYSTEM READY');
+  const [scanIntervalMs, setScanIntervalMs] = useState(8000);
+
+  // Load scan interval from settings on mount
+  useEffect(() => {
+    getSettings().then(s => {
+      if (s?.scanInterval) setScanIntervalMs(s.scanInterval * 1000);
+    }).catch(() => {});
+  }, []);
 
   const glowAnim = useRef(new Animated.Value(0.4)).current;
   useEffect(() => {
@@ -62,9 +70,9 @@ export default function ScannerScreen({ onBack }) {
 
   useEffect(() => {
     if (!autoScan) return;
-    const id = setInterval(() => { if (!scanning) runScan(); }, SCAN_INTERVAL_MS);
+    const id = setInterval(() => { if (!scanning) runScan(); }, scanIntervalMs);
     return () => clearInterval(id);
-  }, [autoScan, scanning]);
+  }, [autoScan, scanning, scanIntervalMs]);
 
   async function runScan() {
     if (scanning) return;
@@ -74,10 +82,15 @@ export default function ScannerScreen({ onBack }) {
       const base64 = await capture();
       if (!base64) return;
       setStatusMsg('ANALYZING...');
-      const result = await analyzeFridge(base64);
-      setItems(result.items ?? []);
+      const [profile, fridgeId] = await Promise.all([getProfile(), getActiveFridge()]);
+      const result = await analyzeFridge(base64, profile);
+      const detected = result.items ?? [];
+      setItems(detected);
       setRecipes([]);
-      setStatusMsg(`${(result.items ?? []).length} ITEMS DETECTED`);
+      onItemsScanned?.(detected);
+      await saveScan(fridgeId, detected);
+      const urgent = detected.filter(i => i.daysLeft <= 2 && i.daysLeft > 0);
+      setStatusMsg(urgent.length > 0 ? `⚠ ${urgent.length} ITEMS EXPIRING SOON` : `${detected.length} ITEMS DETECTED`);
     } catch (err) {
       setStatusMsg('SCAN ERROR');
       console.warn('Scan error:', err.message);
@@ -100,11 +113,6 @@ export default function ScannerScreen({ onBack }) {
     } finally {
       setLoadingRecipes(false);
     }
-  }
-
-  // Request permission automatically — browser shows its own native dialog
-  if (permission && !permission.granted) {
-    requestPermission();
   }
 
   return (
@@ -173,6 +181,16 @@ export default function ScannerScreen({ onBack }) {
 
       {/* Bottom controls */}
       <View style={styles.controls}>
+        {items.length > 0 && (
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.actionBtn} onPress={onGrocery}>
+              <Text style={styles.actionBtnText}>🛒 LIST</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={onMealPlan}>
+              <Text style={styles.actionBtnText}>📅 PLAN</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {items.length > 0 && (
           <TouchableOpacity
             style={[styles.recipesBtn, loadingRecipes && styles.btnDisabled]}
@@ -331,6 +349,13 @@ const styles = StyleSheet.create({
   scanBtnText: { color: '#00D4FF', fontSize: 11, fontWeight: '700', letterSpacing: 2 },
   btnDisabled: { opacity: 0.3 },
 
+  actionRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
+  actionBtn: {
+    backgroundColor: 'rgba(0,8,25,0.7)',
+    borderWidth: 1, borderColor: 'rgba(0,212,255,0.35)',
+    paddingHorizontal: 16, paddingVertical: 8,
+  },
+  actionBtnText: { color: '#00D4FF', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
   recipesBtn: {
     backgroundColor: 'rgba(0,8,25,0.7)',
     borderWidth: 1,

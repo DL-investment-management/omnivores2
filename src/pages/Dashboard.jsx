@@ -17,26 +17,12 @@ import UnitAuthorNode from "@/components/UnitAuthorNode";
 const LAST_KNOWN_LEVEL_KEY = "econogo_last_known_level";
 const LAST_KNOWN_XP_KEY = "econogo_last_known_xp";
 
-const LEFT_TERMS = [
-  "Supply","Demand","Price","Market","Trade","Labor","Capital","Rent",
-  "Profit","Loss","Revenue","Cost","Value","Tax","Debt","Bond",
-  "Stock","Asset","Risk","Credit","Money","Export","Import","Tariff",
-  "Surplus","Shortage","Utility","Equity","Budget","Deficit",
-];
-const RIGHT_TERMS = [
-  "GDP","GNP","CPI","Inflation","Deflation","Recession","Growth","Interest",
-  "Currency","Exchange","Reserve","Fiscal","Monetary","Banking","Loan","Mortgage",
-  "Insurance","Return","Index","Dividend","Option","Hedge","Portfolio","Yield",
-  "Margin","Subsidy","Quota","Wage","Savings","Investment",
-];
-const BUBBLE_COLORS = [
-  "bg-primary/10 text-primary border-primary/25",
-  "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25",
-  "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/25",
-  "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25",
-  "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
-  "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
-  "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/25",
+// Decorative side elements — placed beside specific path nodes like Duolingo
+// Each entry: [leftEmoji, rightEmoji]
+const PATH_DECOS = [
+  ["🐂", "📈"], ["🦊", "💰"], ["🦉", "📊"], ["🐼", "🏛️"],
+  ["🦁", "💡"], ["🐉", "🎯"], ["🦅", "⚡"], ["🦈", "🌍"],
+  ["🐯", "💎"], ["🦝", "📚"], ["🐺", "🪙"], ["🦭", "🏆"],
 ];
 
 function getDayOfYear() {
@@ -344,35 +330,6 @@ export default function Dashboard() {
         })()}
 
         {/* Learning Path */}
-        <div className="relative">
-          {/* Left term bubbles — desktop only, sprinkled down the path */}
-          {LEFT_TERMS.map((term, i) => (
-            <motion.div
-              key={`lt-${term}`}
-              className={`absolute hidden md:flex items-center justify-center w-11 h-11 rounded-full border-2 text-[8px] font-black text-center leading-tight pointer-events-none select-none z-10 ${BUBBLE_COLORS[i % BUBBLE_COLORS.length]}`}
-              style={{ top: `${i * 118 + 60}px`, left: "calc(50% - 215px)" }}
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.4 + i * 0.04 }}
-            >
-              <span className="px-1 break-words max-w-[38px] text-center">{term}</span>
-            </motion.div>
-          ))}
-
-          {/* Right term bubbles — offset by half a step so they stagger with left ones */}
-          {RIGHT_TERMS.map((term, i) => (
-            <motion.div
-              key={`rt-${term}`}
-              className={`absolute hidden md:flex items-center justify-center w-11 h-11 rounded-full border-2 text-[8px] font-black text-center leading-tight pointer-events-none select-none z-10 ${BUBBLE_COLORS[(i + 3) % BUBBLE_COLORS.length]}`}
-              style={{ top: `${i * 118 + 119}px`, right: "calc(50% - 215px)" }}
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.4 + i * 0.04 }}
-            >
-              <span className="px-1 break-words max-w-[38px] text-center">{term}</span>
-            </motion.div>
-          ))}
-
         {Object.entries(filteredUnits).map(([unitName, unitLessons]) => (
         <div key={unitName} className="mb-10">
           <motion.div
@@ -431,11 +388,40 @@ export default function Dashboard() {
 
               return pathItems.map((item, itemIndex) => {
                 const previousItem = pathItems[itemIndex - 1];
+                const deco = PATH_DECOS[itemIndex % PATH_DECOS.length];
+                // Show a left deco every 4 items starting at index 1
+                const showLeft  = itemIndex % 4 === 1;
+                // Show a right deco every 4 items starting at index 3
+                const showRight = itemIndex % 4 === 3;
 
                 return (
                   <div key={item.key} className="relative">
                     {previousItem && (
                       <PathConnector fromLeft={previousItem.isLeft} toLeft={item.isLeft} />
+                    )}
+                    {/* Left side decoration */}
+                    {showLeft && (
+                      <motion.div
+                        className="absolute hidden md:block pointer-events-none select-none"
+                        style={{ left: "-72px", top: "8px" }}
+                        initial={{ scale: 0, rotate: -15, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 18, delay: 0.3 + itemIndex * 0.08 }}
+                      >
+                        <span className="text-4xl drop-shadow-md">{deco[0]}</span>
+                      </motion.div>
+                    )}
+                    {/* Right side decoration */}
+                    {showRight && (
+                      <motion.div
+                        className="absolute hidden md:block pointer-events-none select-none"
+                        style={{ right: "-72px", top: "8px" }}
+                        initial={{ scale: 0, rotate: 15, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 18, delay: 0.3 + itemIndex * 0.08 }}
+                      >
+                        <span className="text-4xl drop-shadow-md">{deco[1]}</span>
+                      </motion.div>
                     )}
                     {item.render()}
                   </div>
@@ -445,7 +431,6 @@ export default function Dashboard() {
           </div>
         </div>
         ))}
-        </div>{/* end relative path wrapper */}
 
         {lessons.length === 0 && (
         <div className="text-center py-20">
