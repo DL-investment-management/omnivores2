@@ -18,6 +18,7 @@ const CONDITION_LABELS = {
 export default function FoodCard({ item }) {
   const color = CONDITION_COLORS[item.condition] ?? '#888';
   const label = CONDITION_LABELS[item.condition] ?? item.condition;
+  const allergen = item.allergenAlert;
 
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
@@ -28,6 +29,9 @@ export default function FoodCard({ item }) {
         </Text>
       </View>
       <Text style={[styles.condition, { color }]}>{label}</Text>
+      {allergen && (
+        <Text style={{ color: '#FF6B6B', fontWeight: 'bold', marginBottom: 2 }}>⚠ Allergen Alert</Text>
+      )}
       {item.notes ? <Text style={styles.notes}>{item.notes}</Text> : null}
     </View>
   );

@@ -38,9 +38,10 @@ function HudChip({ item, index }) {
 
   const color = CONDITION_COLORS[item.condition] ?? '#00D4FF';
   const label = CONDITION_LABEL[item.condition] ?? item.condition.toUpperCase();
+  const allergen = item.allergenAlert;
 
   return (
-    <Animated.View style={[styles.chip, { borderColor: color, opacity: fadeAnim, transform: [{ translateX: slideAnim }] }]}>
+    <Animated.View style={[styles.chip, { borderColor: color, opacity: fadeAnim, transform: [{ translateX: slideAnim }] }]}> 
       {/* Corner brackets */}
       <View style={[styles.cornerTL, { borderColor: color }]} />
       <View style={[styles.cornerBR, { borderColor: color }]} />
@@ -49,10 +50,13 @@ function HudChip({ item, index }) {
         <Text style={[styles.chipName, { color: '#E0F7FF' }]}>{item.name.toUpperCase()}</Text>
         <View style={styles.chipRow}>
           <Text style={[styles.chipStatus, { color }]}>{label}</Text>
-          <Text style={[styles.chipDays, { color }]}>
+          <Text style={[styles.chipDays, { color }]}> 
             {item.daysLeft === 0 ? '⚠ EXPIRED' : `${item.daysLeft}D`}
           </Text>
         </View>
+        {allergen && (
+          <Text style={{ color: '#FF6B6B', fontWeight: 'bold', fontSize: 11, marginTop: 2 }}>⚠ Allergen Alert</Text>
+        )}
       </View>
 
       {/* Pulse dot */}

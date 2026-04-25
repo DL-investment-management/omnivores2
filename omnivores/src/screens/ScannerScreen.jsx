@@ -5,10 +5,17 @@ import {
 } from 'react-native';
 import { CameraView } from 'expo-camera';
 import { useCamera } from '../hooks/useCamera';
-import { analyzeFridge, getRecipes } from '../api/claude';
+import { analyzeFridge, getRecipes, lookupBarcode } from '../api/claude';
+import { Platform } from 'react-native';
+// expo-barcode-scanner is native-only; safe to import but only use on native
+let BarCodeScanner = null;
+if (Platform.OS !== 'web') {
+  BarCodeScanner = require('expo-barcode-scanner').BarCodeScanner;
+}
 import FoodOverlay from '../components/FoodOverlay';
 import RecipeSheet from '../components/RecipeSheet';
 import { saveScan, getActiveFridge, getProfile, getSettings } from '../storage/db';
+import { sendExpiryNotification } from '../utils/notifications';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -42,6 +49,29 @@ function ScanLine({ scanning }) {
 }
 
 export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMealPlan }) {
+    const [barcodeMode, setBarcodeMode] = useState(false);
+    const [barcodeResult, setBarcodeResult] = useState(null);
+    const [barcodeLoading, setBarcodeLoading] = useState(false);
+    const [barcodePermission, setBarcodePermission] = useState(null);
+    // Request barcode scanner permission
+    useEffect(() => {
+      if (barcodeMode) {
+        BarCodeScanner.requestPermissionsAsync().then(({ status }) => setBarcodePermission(status === 'granted'));
+      }
+    }, [barcodeMode]);
+    async function handleBarCodeScanned({ data }) {
+      setBarcodeLoading(true);
+      setBarcodeResult(null);
+      try {
+        const result = await lookupBarcode(data);
+        setBarcodeResult(result);
+      } catch (err) {
+        setBarcodeResult({ error: err.message });
+      } finally {
+        setBarcodeLoading(false);
+        setBarcodeMode(false);
+      }
+    }
   const { cameraRef, permission, requestPermission, capture } = useCamera();
   const [items, setItems] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -82,15 +112,27 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
       const base64 = await capture();
       if (!base64) return;
       setStatusMsg('ANALYZING...');
-      const [profile, fridgeId] = await Promise.all([getProfile(), getActiveFridge()]);
+      const [profile, fridgeId, settings] = await Promise.all([
+        getProfile(),
+        getActiveFridge(),
+        getSettings()
+      ]);
       const result = await analyzeFridge(base64, profile);
       const detected = result.items ?? [];
       setItems(detected);
       setRecipes([]);
       onItemsScanned?.(detected);
       await saveScan(fridgeId, detected);
-      const urgent = detected.filter(i => i.daysLeft <= 2 && i.daysLeft > 0);
-      setStatusMsg(urgent.length > 0 ? `⚠ ${urgent.length} ITEMS EXPIRING SOON` : `${detected.length} ITEMS DETECTED`);
+      // Expiry notification logic
+      if (settings.notificationsEnabled) {
+        const urgent = detected.filter(i => i.daysLeft <= (settings.notifyThresholdDays ?? 2) && i.daysLeft > 0);
+        if (urgent.length > 0) {
+          await sendExpiryNotification(urgent);
+        }
+        setStatusMsg(urgent.length > 0 ? `⚠ ${urgent.length} ITEMS EXPIRING SOON` : `${detected.length} ITEMS DETECTED`);
+      } else {
+        setStatusMsg(`${detected.length} ITEMS DETECTED`);
+      }
     } catch (err) {
       setStatusMsg('SCAN ERROR');
       console.warn('Scan error:', err.message);
@@ -117,6 +159,13 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
 
   return (
     <View style={styles.root}>
+      {/* Barcode scanner overlay — native only */}
+      {barcodeMode && barcodePermission && BarCodeScanner && (
+        <BarCodeScanner
+          onBarCodeScanned={handleBarCodeScanned}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       {/* Camera */}
       <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
 
@@ -181,6 +230,34 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
         <Text style={styles.autoBtnText}>{autoScan ? '⟳  Auto: On' : '⟳  Auto: Off'}</Text>
       </TouchableOpacity>
 
+      {/* Barcode result modal */}
+      {barcodeResult && (
+        <View style={{ position: 'absolute', top: 80, left: 20, right: 20, backgroundColor: '#222', borderRadius: 12, padding: 18, zIndex: 10 }}>
+          {barcodeLoading ? (
+            <ActivityIndicator color="#00D4FF" size="large" />
+          ) : barcodeResult.error ? (
+            <Text style={{ color: '#FF6B6B', fontWeight: 'bold' }}>Error: {barcodeResult.error}</Text>
+          ) : (
+            <>
+              <Text style={{ color: '#00D4FF', fontWeight: 'bold', fontSize: 16 }}>{barcodeResult.name}</Text>
+              <Text style={{ color: '#aaa', marginBottom: 6 }}>{barcodeResult.notes}</Text>
+              <Text style={{ color: '#fff' }}>Condition: {barcodeResult.condition}</Text>
+              <Text style={{ color: '#fff' }}>Days Left: {barcodeResult.daysLeft}</Text>
+              <Text style={{ color: '#fff' }}>Calories: {barcodeResult.nutrition?.calories ?? '-'} kcal</Text>
+              <Text style={{ color: '#fff' }}>Protein: {barcodeResult.nutrition?.protein ?? '-'}g</Text>
+              <Text style={{ color: '#fff' }}>Carbs: {barcodeResult.nutrition?.carbs ?? '-'}g</Text>
+              <Text style={{ color: '#fff' }}>Fat: {barcodeResult.nutrition?.fat ?? '-'}g</Text>
+              {barcodeResult.allergenAlert && (
+                <Text style={{ color: '#FF6B6B', fontWeight: 'bold', marginTop: 4 }}>⚠ Allergen Alert</Text>
+              )}
+            </>
+          )}
+          <TouchableOpacity style={{ marginTop: 12, alignSelf: 'flex-end' }} onPress={() => setBarcodeResult(null)}>
+            <Text style={{ color: '#00D4FF', fontWeight: 'bold' }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Bottom controls */}
       <View style={styles.controls}>
         {/* Quick action row */}
@@ -222,6 +299,16 @@ export default function ScannerScreen({ onBack, onItemsScanned, onGrocery, onMea
             ? <ActivityIndicator color="#00D4FF" size="small" />
             : <Text style={styles.scanBtnText}>SCAN</Text>
           }
+        </TouchableOpacity>
+
+        {/* Barcode scan button */}
+        <TouchableOpacity
+          style={[styles.scanBtn, barcodeMode && styles.btnDisabled, { marginTop: 10, backgroundColor: '#222' }]}
+          onPress={() => setBarcodeMode(true)}
+          disabled={barcodeMode}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.scanBtnText}>Scan Barcode</Text>
         </TouchableOpacity>
 
         {/* Info bar */}
